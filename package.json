@@ -22,6 +22,7 @@
     "@atproto/oauth-client-browser": "^0.5.10"
   },
   "devDependencies": {
+    "@types/node": "^22.20.5",
     "fake-indexeddb": "^6.2.6",
     "typescript": "^5.9.3",
     "vite": "^8.3.4",
