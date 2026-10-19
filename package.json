@@ -1,0 +1,30 @@
+{
+  "name": "quiet.notx.blue",
+  "version": "0.1.0",
+  "private": true,
+  "description": "See which Bluesky accounts you follow have gone quiet, and unfollow them if you want.",
+  "license": "GPL-3.0-only",
+  "author": "Joselito <eu@joseli.to>",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:contract": "QUIET_CONTRACT=1 vitest run test/contract"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@atproto/oauth-client-browser": "^0.5.10"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.6",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  }
+}
