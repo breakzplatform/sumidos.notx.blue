@@ -1,35 +1,35 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
-import { buildClientMetadata, DEFAULT_OAUTH_SCOPE, DEFAULT_PUBLIC_URL } from './src/lib/oauth-metadata.ts';
+import { allowedHosts, buildClientMetadata, metadataPath, parseHostList } from './src/lib/oauth-metadata.ts';
 
 /**
- * Writes client-metadata.json next to index.html at build time, derived
- * from VITE_PUBLIC_URL so it always matches what the app sends.
+ * Writes one OAuth client metadata document per allowed host, derived from
+ * the same code the app uses at runtime.
  */
-function clientMetadata(publicUrl: string, scope: string): Plugin {
+function clientMetadata(hosts: readonly string[]): Plugin {
   return {
-    name: 'quiet:client-metadata',
+    name: 'sumidos:client-metadata',
     apply: 'build',
     generateBundle() {
-      this.emitFile({
-        type: 'asset',
-        fileName: 'client-metadata.json',
-        source: `${JSON.stringify(buildClientMetadata(publicUrl, scope), null, 2)}\n`,
-      });
+      for (const host of hosts) {
+        this.emitFile({
+          type: 'asset',
+          fileName: metadataPath(host),
+          source: `${JSON.stringify(buildClientMetadata(host), null, 2)}\n`,
+        });
+      }
     },
   };
 }
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', 'VITE_');
-  const publicUrl = env.VITE_PUBLIC_URL || DEFAULT_PUBLIC_URL;
-  const scope = env.VITE_OAUTH_SCOPE || DEFAULT_OAUTH_SCOPE;
+  const hosts = allowedHosts(parseHostList(env.VITE_OAUTH_EXTRA_HOSTS));
   return {
-    // Relative asset paths: the build works from any directory or host.
-    base: './',
-    plugins: [clientMetadata(publicUrl, scope)],
+    base: '/',
+    plugins: [clientMetadata(hosts)],
     build: {
       target: 'es2022',
-      sourcemap: true,
+      sourcemap: false,
     },
     server: {
       host: '127.0.0.1',
