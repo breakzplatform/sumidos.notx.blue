@@ -6,7 +6,6 @@ import type {
   GetAuthorFeedResponse,
   GetFollowsResponse,
   GetProfilesResponse,
-  GetRelationshipsResponse,
   ListRecordsResponse,
   ProfileViewDetailed,
 } from './types';
@@ -20,7 +19,6 @@ export interface BskyReader {
   getProfile(actor: string, call?: CallOptions): Promise<ProfileViewDetailed>;
   getProfiles(actors: string[], call?: CallOptions): Promise<GetProfilesResponse>;
   getFollows(actor: string, cursor: string | undefined, call?: CallOptions): Promise<GetFollowsResponse>;
-  getRelationships(actor: string, others: string[], call?: CallOptions): Promise<GetRelationshipsResponse>;
   getAuthorFeed(
     params: { actor: string; limit: number; filter: string; cursor?: string },
     call?: CallOptions,
@@ -46,14 +44,6 @@ export class AppViewReader implements BskyReader {
     );
   }
 
-  getRelationships(actor: string, others: string[], call?: CallOptions) {
-    return this.client.query<GetRelationshipsResponse>(
-      'app.bsky.graph.getRelationships',
-      { actor, others },
-      call,
-    );
-  }
-
   getAuthorFeed(params: { actor: string; limit: number; filter: string; cursor?: string }, call?: CallOptions) {
     return this.client.query<GetAuthorFeedResponse>(
       'app.bsky.feed.getAuthorFeed',
@@ -63,10 +53,17 @@ export class AppViewReader implements BskyReader {
   }
 }
 
-/** Repository calls against a PDS. Reads are public; deletes need auth. */
+export type RepoWrite =
+  | { $type: 'com.atproto.repo.applyWrites#delete'; collection: string; rkey: string }
+  | { $type: 'com.atproto.repo.applyWrites#create'; collection: string; rkey?: string; value: Record<string, unknown> };
+
+/** Most writes one com.atproto.repo.applyWrites call accepts. */
+export const MAX_WRITES_PER_CALL = 200;
+
+/** Calls against the logged-in account's own PDS. */
 export interface RepoClient {
   listFollows(repo: string, cursor: string | undefined, call?: CallOptions): Promise<ListRecordsResponse<FollowRecord>>;
-  deleteRecord(repo: string, collection: string, rkey: string, call?: CallOptions): Promise<void>;
+  applyWrites(repo: string, writes: RepoWrite[], call?: CallOptions): Promise<void>;
 }
 
 export class PdsRepoClient implements RepoClient {
@@ -80,8 +77,8 @@ export class PdsRepoClient implements RepoClient {
     );
   }
 
-  async deleteRecord(repo: string, collection: string, rkey: string, call?: CallOptions) {
-    await this.client.procedure('com.atproto.repo.deleteRecord', { repo, collection, rkey }, call);
+  async applyWrites(repo: string, writes: RepoWrite[], call?: CallOptions) {
+    await this.client.procedure('com.atproto.repo.applyWrites', { repo, writes }, call);
   }
 }
 
