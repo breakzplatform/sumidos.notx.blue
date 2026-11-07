@@ -1,6 +1,6 @@
-// Applies the saved theme before first paint to avoid a flash.
-// Kept as a separate file so the Content-Security-Policy needs no inline scripts.
+// Applies the saved theme before first paint to avoid a flash. A separate
+// file so the Content-Security-Policy needs no inline script.
 try {
-  var t = localStorage.getItem('quiet.theme');
-  if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+  var saved = localStorage.getItem('theme');
+  if (saved === 'dark' || saved === 'terminal') document.documentElement.setAttribute('data-theme', saved);
 } catch (e) {}

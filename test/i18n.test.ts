@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { I18n, LOCALES, format, pickLocale } from '../src/lib/i18n';
+import { I18n, LOCALES, format, localeForHost } from '../src/lib/i18n';
 
-describe('pickLocale', () => {
-  it('maps browser languages to supported locales', () => {
-    expect(pickLocale(['pt-BR', 'en'])).toBe('pt-BR');
-    expect(pickLocale(['pt-PT'])).toBe('pt-BR');
-    expect(pickLocale(['fr-FR', 'en-GB'])).toBe('en');
-    expect(pickLocale(['de'])).toBe('en');
-    expect(pickLocale([])).toBe('en');
+describe('localeForHost', () => {
+  it('opens the English alias in English and everything else in Portuguese', () => {
+    expect(localeForHost('quiet.notx.blue')).toBe('en');
+    expect(localeForHost('sumidos.notx.blue')).toBe('pt-BR');
+    expect(localeForHost('127.0.0.1')).toBe('pt-BR');
   });
 });
 
@@ -27,8 +25,23 @@ describe('format', () => {
 
   it('uses Portuguese plural rules and number format', () => {
     const t = new I18n('pt-BR').t;
-    expect(t('days_ago', { count: 1 })).toBe('há 1 dia');
-    expect(t('days_ago', { count: 2000 })).toBe('há 2.000 dias');
+    expect(t('span.days', { count: 1 })).toBe('1 dia');
+    expect(t('span.days', { count: 2000 })).toBe('2.000 dias');
+    expect(t('span.months', { count: 1 })).toBe('1 mês');
+  });
+
+  it('agrees in number, zero included', () => {
+    const pt = new I18n('pt-BR').t;
+    const en = new I18n('en').t;
+    expect(pt('owner.unfollow', { count: 0 })).toBe('Deixar de seguir');
+    expect(pt('owner.unfollow', { count: 1 })).toBe('Deixar de seguir 1 conta');
+    expect(pt('owner.unfollow', { count: 3 })).toBe('Deixar de seguir 3 contas');
+    expect(en('owner.unfollow', { count: 0 })).toBe('Unfollow');
+    expect(en('owner.unfollow', { count: 1 })).toBe('Unfollow 1 account');
+    expect(pt('confirm.title', { count: 1 })).toBe('Deixar de seguir 1 conta?');
+    expect(pt('undo.text', { count: 2 })).toBe('Você deixou de seguir 2 contas.');
+    expect(pt('results.meta', { shown: 1, count: 1 })).toBe('1 de 1 conta no filtro');
+    expect(pt('results.meta', { shown: 0, count: 0 })).toBe('0 de 0 contas no filtro');
   });
 });
 

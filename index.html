@@ -1,275 +1,182 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="description" content="See which Bluesky accounts you follow have gone quiet. Runs entirely in your browser." />
+    <meta name="description" content="Descubra quem um @ segue no Bluesky e parou de postar. Roda no seu navegador." />
     <meta name="referrer" content="no-referrer" />
-    <title>quiet.notx.blue</title>
-    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <script src="./theme-init.js"></script>
+    <title>Contas que você segue e pararam de postar • sumidos.notx.blue</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script src="/theme-init.js"></script>
   </head>
   <body>
-    <a class="skip-link" href="#main" data-i18n="app.skip">Skip to content</a>
-
-    <header class="site-header">
-      <div class="container header-inner">
-        <div class="brand">
-          <h1 class="brand-name">quiet<span class="brand-suffix">.notx.blue</span></h1>
-          <p class="tagline" data-i18n="app.tagline"></p>
+    <a class="skip" href="#conteudo" data-i18n="skip">Ir para o conteúdo</a>
+    <div class="page">
+      <header>
+        <div class="tools">
+          <button id="language" type="button" class="db-btn db-btn-sm cast press" lang="en">english</button>
+          <button id="theme" type="button" class="db-btn db-btn-sm cast press">escuro</button>
         </div>
-        <div class="header-controls">
-          <label class="inline-field">
-            <span data-i18n="language">Language</span>
-            <select id="lang-select"></select>
-          </label>
-          <label class="inline-field">
-            <span data-i18n="theme">Theme</span>
-            <select id="theme-select">
-              <option value="auto" data-i18n="theme.auto"></option>
-              <option value="light" data-i18n="theme.light"></option>
-              <option value="dark" data-i18n="theme.dark"></option>
-            </select>
-          </label>
+        <div class="db-wordmark">
+          <a href="/" id="wordmark" aria-label="sumidos.notx.blue"
+            ><span class="ink-block tilt-cw" id="wordmark-name">sumidos</span><span class="wordmark-suffix">.notx.blue</span></a
+          >
         </div>
-      </div>
-    </header>
+      </header>
 
-    <main id="main" class="container" tabindex="-1">
-      <section class="note" aria-labelledby="privacy-title">
-        <h2 id="privacy-title" class="note-title" data-i18n="privacy.title"></h2>
-        <p data-i18n="privacy.body"></p>
-      </section>
+      <main id="conteudo" tabindex="-1">
+        <p class="privacy-line" id="privacy-line" data-i18n="privacy.public">
+          A consulta roda no seu navegador. Nada é guardado nem enviado para servidores nossos.
+        </p>
 
-      <div class="grid-top">
-        <section class="card" aria-labelledby="scan-title">
-          <h2 id="scan-title" data-i18n="scan.title"></h2>
-          <form id="scan-form" novalidate>
+        <section class="cast" aria-labelledby="search-title">
+          <h1 class="db-panel-head" id="search-title"><span data-i18n="search.title">Quem parou de postar</span></h1>
+          <form id="search-form" class="panel-body stack" novalidate>
+            <p class="lede" data-i18n="search.lede">Descubra quem um @ segue no Bluesky e parou de postar.</p>
             <div class="field">
-              <label for="actor-input" data-i18n="scan.handle"></label>
-              <input
-                id="actor-input"
-                name="actor"
-                type="text"
-                inputmode="url"
-                autocomplete="off"
-                autocapitalize="off"
-                spellcheck="false"
-                list="recent-scans"
-                aria-describedby="actor-hint actor-error"
-                data-i18n-placeholder="scan.handlePlaceholder"
-                required
-              />
-              <datalist id="recent-scans"></datalist>
-              <p id="actor-hint" class="hint" data-i18n="scan.handleHint"></p>
-              <p id="actor-error" class="field-error" hidden></p>
+              <label for="actor" data-i18n="search.label">@ no Bluesky</label>
+              <div class="row-input">
+                <span class="db-field"
+                  ><input
+                    id="actor"
+                    class="db-input"
+                    name="actor"
+                    type="text"
+                    inputmode="email"
+                    autocomplete="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    placeholder="voce.bsky.social"
+                    data-i18n-placeholder="search.placeholder"
+                /></span>
+                <button id="run" type="submit" class="db-btn db-btn-primary cast press" data-i18n="search.run">Verificar</button>
+                <button id="stop" type="button" class="db-btn cast press" disabled data-i18n="search.stop">Parar</button>
+              </div>
             </div>
-
-            <fieldset class="field">
-              <legend data-i18n="scan.mode"></legend>
-              <label class="choice"><input type="radio" name="mode" value="posts" checked /> <span data-i18n="scan.mode.posts"></span></label>
-              <label class="choice"><input type="radio" name="mode" value="posts_replies" /> <span data-i18n="scan.mode.posts_replies"></span></label>
-              <label class="choice"><input type="radio" name="mode" value="all" /> <span data-i18n="scan.mode.all"></span></label>
+            <fieldset class="options">
+              <legend class="sr" data-i18n="rules.legend">O que conta como atividade</legend>
+              <label class="min-days"
+                ><span data-i18n="rules.minDays">Sem postar há mais de</span>
+                <select id="min-days" class="db-select">
+                  <option value="30">30</option>
+                  <option value="90" selected>90</option>
+                  <option value="180">180</option>
+                  <option value="365">365</option>
+                </select></label
+              >
+              <label><input id="count-replies" type="checkbox" checked /> <span data-i18n="rules.replies">Contar respostas</span></label>
+              <label><input id="count-reposts" type="checkbox" /> <span data-i18n="rules.reposts">Contar reposts</span></label>
             </fieldset>
-
-            <fieldset class="field">
-              <legend data-i18n="scan.type"></legend>
-              <label class="choice">
-                <input type="radio" name="scanType" value="full" checked aria-describedby="full-hint" />
-                <span data-i18n="scan.type.full"></span>
-              </label>
-              <p id="full-hint" class="hint indent" data-i18n="scan.type.fullHint"></p>
-              <label class="choice">
-                <input type="radio" name="scanType" value="quick" aria-describedby="quick-hint" />
-                <span data-i18n="scan.type.quick"></span>
-              </label>
-              <p id="quick-hint" class="hint indent" data-i18n="scan.type.quickHint"></p>
-              <div class="indent sample-row">
-                <label for="sample-input" data-i18n="scan.sample"></label>
-                <input id="sample-input" name="sample" type="number" min="1" step="1" inputmode="numeric" disabled />
-                <span class="hint" data-i18n="scan.sampleHint"></span>
-              </div>
-            </fieldset>
-
-            <details class="field advanced">
-              <summary data-i18n="scan.advanced"></summary>
-              <div class="field">
-                <label for="concurrency-input" data-i18n="scan.concurrency"></label>
-                <input id="concurrency-input" name="concurrency" type="number" min="1" max="8" step="1" value="4" />
-              </div>
-              <div class="field">
-                <label for="maxage-input" data-i18n="scan.maxAge"></label>
-                <input id="maxage-input" name="maxAge" type="number" min="0" step="1" value="24" />
-              </div>
-              <label class="choice"><input type="checkbox" name="force" /> <span data-i18n="scan.force"></span></label>
-            </details>
-
-            <div class="button-row">
-              <button type="submit" id="scan-button" class="primary" data-i18n="scan.start"></button>
-              <button type="button" id="cancel-button" hidden data-i18n="scan.cancel"></button>
-            </div>
+            <p class="db-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
           </form>
+          <div class="panel-foot" id="account-box">
+            <div id="auth-out" class="auth-row">
+              <p data-i18n="auth.pitch">Para deixar de seguir contas da sua própria lista, entre com o Bluesky. A permissão cobre só seguir e deixar de seguir.</p>
+              <button id="sign-in" type="button" class="db-btn cast press" data-i18n="auth.signIn">Entrar com o Bluesky</button>
+            </div>
+            <div id="auth-in" class="auth-row" hidden>
+              <p id="auth-who"></p>
+              <button id="sign-out" type="button" class="db-btn db-btn-sm cast press" data-i18n="auth.signOut">Sair</button>
+            </div>
+            <p id="auth-error" class="auth-error" role="alert" hidden></p>
+          </div>
+        </section>
 
-          <div id="progress" class="progress" hidden>
-            <p id="progress-label" class="progress-label"></p>
+        <p class="status-line" id="status" role="status" data-i18n="status.idle">Digite um @ e clique em Verificar.</p>
+
+        <section class="cast" id="progress" aria-labelledby="progress-title" hidden>
+          <h2 class="db-panel-head" id="progress-title">
+            <span data-i18n="progress.title">Lendo</span><span class="db-panel-status" id="progress-count"></span>
+          </h2>
+          <div class="panel-body stack">
+            <p class="phase" id="progress-phase"></p>
             <progress id="progress-bar" max="1" value="0"></progress>
-            <p id="progress-count" class="hint" aria-live="polite"></p>
-            <p id="progress-retry" class="hint" aria-live="polite"></p>
+            <div id="large-list" class="db-callout callout-warn" hidden>
+              <span class="db-callout-spine" aria-hidden="true">!</span>
+              <p class="db-callout-body" id="large-list-text"></p>
+            </div>
+            <p id="wait" class="banner" hidden></p>
           </div>
-          <div id="scan-status" class="status" role="status" aria-live="polite"></div>
         </section>
 
-        <section class="card" aria-labelledby="auth-title">
-          <h2 id="auth-title" data-i18n="auth.title"></h2>
-          <div id="auth-out">
-            <p class="hint" data-i18n="auth.intro"></p>
-            <form id="login-form" class="inline-form">
-              <label for="login-input" class="visually-hidden" data-i18n="auth.handle"></label>
-              <input
-                id="login-input"
-                type="text"
-                autocomplete="username"
-                autocapitalize="off"
-                spellcheck="false"
-                data-i18n-placeholder="auth.handle"
-              />
-              <button type="submit" data-i18n="auth.login"></button>
-            </form>
-          </div>
-          <div id="auth-in" hidden>
-            <p id="auth-who"></p>
-            <button type="button" id="logout-button" data-i18n="auth.logout"></button>
-          </div>
-          <p id="auth-status" class="status" role="status" aria-live="polite"></p>
-        </section>
-      </div>
-
-      <section id="results" class="card results" aria-labelledby="results-title" hidden>
-        <h2 id="results-title"></h2>
-        <p id="results-summary" class="hint"></p>
-
-        <form id="filters" class="filters" aria-labelledby="filters-title">
-          <h3 id="filters-title" class="visually-hidden" data-i18n="filter.title"></h3>
-          <div class="field">
-            <label for="min-days" data-i18n="filter.minDays"></label>
-            <div class="inline-form">
-              <select id="min-days"></select>
-              <input id="custom-days" type="number" min="1" step="1" inputmode="numeric" hidden data-i18n-aria-label="filter.customDays" />
+        <section class="cast" id="results" aria-labelledby="results-title" hidden>
+          <h2 class="db-panel-head" id="results-title">
+            <span id="results-owner"></span><span class="db-panel-status" id="results-count"></span>
+          </h2>
+          <div class="panel-body stack">
+            <div class="field">
+              <label for="search" data-i18n="results.search">Nome ou @</label>
+              <span class="db-field"><input id="search" class="db-input" type="search" autocomplete="off" spellcheck="false" /></span>
+            </div>
+            <p class="list-note" id="results-note"></p>
+            <div class="results-bar">
+              <p class="db-meta" id="results-meta"></p>
+              <button id="csv" type="button" class="db-btn db-btn-sm cast press" data-i18n="results.csv">Exportar CSV</button>
+            </div>
+            <div id="owner-bar" class="owner-bar" hidden>
+              <button id="mark-all" type="button" class="db-btn db-btn-sm cast press"></button>
+              <button id="mark-none" type="button" class="db-btn db-btn-sm cast press" data-i18n="owner.clear">Desmarcar</button>
+              <button id="unfollow" type="button" class="db-btn db-btn-danger cast press" disabled></button>
+            </div>
+            <div id="undo-bar" class="banner undo-bar" hidden>
+              <p id="undo-text"></p>
+              <progress id="undo-bar-progress" max="1" value="0" hidden></progress>
+              <button id="undo" type="button" class="db-btn db-btn-sm cast press" data-i18n="undo.run">Desfazer</button>
             </div>
           </div>
-          <div class="field">
-            <label for="search-input" data-i18n="filter.search"></label>
-            <input id="search-input" type="search" data-i18n-placeholder="filter.searchPlaceholder" autocomplete="off" />
-          </div>
-          <div class="field checks">
-            <label class="choice"><input type="checkbox" id="only-nonmutual" /> <span data-i18n="filter.nonMutual"></span></label>
-            <label class="choice"><input type="checkbox" id="only-never" /> <span data-i18n="filter.neverPosted"></span></label>
-            <label class="choice"><input type="checkbox" id="only-ghosts" /> <span data-i18n="filter.ghosts"></span></label>
-            <label class="choice"><input type="checkbox" id="hide-kept" /> <span data-i18n="filter.hideKept"></span></label>
-          </div>
-        </form>
-
-        <div class="toolbar">
-          <p id="showing" class="showing" aria-live="polite"></p>
-          <div class="button-row">
-            <button type="button" id="export-button" data-i18n="actions.export"></button>
-            <button type="button" id="select-all-button" data-i18n="actions.selectAll"></button>
-            <button type="button" id="clear-selection-button" data-i18n="actions.clearSelection"></button>
-          </div>
-        </div>
-
-        <div class="unfollow-bar">
-          <span id="selected-count" class="selected-count"></span>
-          <label class="choice"><input type="checkbox" id="dry-run" checked /> <span data-i18n="actions.dryRun"></span></label>
-          <button type="button" id="unfollow-button" class="danger"></button>
-          <p id="unfollow-hint" class="hint"></p>
-        </div>
-
-        <div class="table-wrap">
-          <table id="results-table">
-            <thead>
-              <tr>
-                <th scope="col" class="col-select"><span class="visually-hidden" data-i18n="col.select"></span></th>
-                <th scope="col" data-sort="name"></th>
-                <th scope="col" data-sort="inactivity"></th>
-                <th scope="col" data-sort="followers" class="num"></th>
-                <th scope="col" data-sort="following" class="num"></th>
-                <th scope="col" data-sort="posts" class="num"></th>
-                <th scope="col" data-i18n="col.status"></th>
-                <th scope="col" data-i18n="col.keep"></th>
-              </tr>
-            </thead>
-            <tbody id="results-body"></tbody>
-          </table>
-        </div>
-        <p id="results-empty" class="empty" hidden data-i18n="results.empty"></p>
-        <div class="button-row center">
-          <button type="button" id="more-button" hidden data-i18n="results.more"></button>
-        </div>
-      </section>
-
-      <div class="grid-bottom">
-        <section class="card" aria-labelledby="keep-title">
-          <h2 id="keep-title" data-i18n="keep.title"></h2>
-          <p class="hint" data-i18n="keep.intro"></p>
-          <p id="keep-count"></p>
-          <div class="button-row">
-            <button type="button" id="keep-export" data-i18n="keep.export"></button>
-            <label class="button-like">
-              <span data-i18n="keep.import"></span>
-              <input type="file" id="keep-import" accept="application/json,.json" class="visually-hidden" />
-            </label>
-            <button type="button" id="keep-clear" data-i18n="keep.clear"></button>
-          </div>
-          <p id="keep-status" class="status" role="status" aria-live="polite"></p>
-        </section>
-
-        <section class="card" aria-labelledby="cache-title">
-          <h2 id="cache-title" data-i18n="cache.title"></h2>
-          <p class="hint" data-i18n="cache.intro"></p>
-          <ul id="cache-list" class="cache-list"></ul>
-          <div class="button-row">
-            <button type="button" id="cache-clear" data-i18n="cache.clear"></button>
+          <ol class="accounts" id="list"></ol>
+          <p class="empty" id="empty" hidden data-i18n="results.empty">Nenhuma conta corresponde ao filtro.</p>
+          <div class="more" id="more-box" hidden>
+            <button id="more" type="button" class="db-btn cast press"></button>
           </div>
         </section>
-      </div>
-    </main>
 
-    <dialog id="confirm-dialog" aria-labelledby="confirm-title">
-      <form method="dialog">
+        <p class="db-note" id="note" data-i18n="note.deactivated">
+          Conta desativada some da lista pública de quem a pessoa segue. Só aparece quando você entra e vê a sua própria lista.
+        </p>
+      </main>
+
+      <footer>
+        <p class="db-meta foot">
+          <span data-i18n="footer.status">Em construção. Espere bugs</span>
+          <span><a id="bug" href="https://q.joseli.to/forms/notx-blue-bugs-pt" target="_blank" rel="noopener" data-i18n="footer.bug">achou um?</a></span>
+          <span
+            ><span data-i18n="footer.partOf">parte do</span> <a href="https://notx.blue">notx.blue</a>
+            <span data-i18n="footer.by">por</span> <a href="https://bsky.app/profile/joseli.to">@joseli.to</a></span
+          >
+          <span><a href="https://notx.blue/privacy" data-i18n="footer.privacy">Privacidade</a></span>
+          <span><a href="https://status.joseli.to/" target="_blank" rel="noopener">status</a></span>
+          <span><a href="mailto:abuse@notx.blue">abuse@notx.blue</a></span>
+        </p>
+        <p class="db-note center" data-i18n="footer.fromBrazil">
+          Direto do Brasil pelo Joselito, com muito carinho. Este site não usa cookies nem analytics. Idioma e tema ficam neste navegador. Não tem relação com o Bluesky.
+        </p>
+        <div class="chips">
+          <span class="db-meta" data-i18n="footer.support">Apoie este projeto:</span>
+          <a class="chip chip-pix cast press" href="https://pix.joseli.to" target="_blank" rel="noopener">Pix</a>
+          <a class="chip chip-mp cast press" href="https://link.mercadopago.com.br/breakzplatform" target="_blank" rel="noopener">Mercado Pago</a>
+          <a class="chip chip-coffee cast press" href="https://buymeacoffee.com/joselito" target="_blank" rel="noopener">Buy Me a Coffee</a>
+          <a class="chip chip-sponsors cast press" href="https://github.com/sponsors/breakzplatform" target="_blank" rel="noopener">GitHub Sponsors</a>
+        </div>
+      </footer>
+    </div>
+
+    <dialog id="confirm" aria-labelledby="confirm-title">
+      <form method="dialog" class="dialog-body">
         <h2 id="confirm-title"></h2>
-        <p id="confirm-body"></p>
-        <p id="confirm-kept" class="hint"></p>
-        <div class="button-row end">
-          <button value="cancel" data-i18n="confirm.cancel" autofocus></button>
-          <button value="go" id="confirm-go" class="danger"></button>
+        <p id="confirm-text"></p>
+        <ol class="log" id="confirm-list"></ol>
+        <div id="confirm-run" hidden>
+          <p class="phase" id="confirm-phase"></p>
+          <progress id="confirm-progress" max="1" value="0"></progress>
+        </div>
+        <div class="actions">
+          <button id="confirm-go" type="button" class="db-btn db-btn-danger cast press"></button>
+          <button id="confirm-cancel" type="button" class="db-btn cast press" data-i18n="confirm.cancel">Cancelar</button>
         </div>
       </form>
     </dialog>
 
-    <dialog id="run-dialog" aria-labelledby="run-title">
-      <h2 id="run-title"></h2>
-      <progress id="run-progress" max="1" value="0"></progress>
-      <h3 class="log-title" data-i18n="run.log"></h3>
-      <ol id="run-log" class="run-log"></ol>
-      <p id="run-summary" class="run-summary" role="status"></p>
-      <div class="button-row end">
-        <button type="button" id="run-stop" class="danger" data-i18n="run.stop"></button>
-        <button type="button" id="run-close" hidden data-i18n="run.close"></button>
-      </div>
-    </dialog>
-
-    <footer class="site-footer">
-      <div class="container">
-        <p>
-          <span data-i18n="footer.license"></span>
-          <a href="https://github.com/breakzplatform/quiet.notx.blue" rel="noopener" data-i18n="footer.source"></a>
-        </p>
-        <p data-i18n="footer.family"></p>
-      </div>
-    </footer>
-
-    <script type="module" src="./src/main.ts"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

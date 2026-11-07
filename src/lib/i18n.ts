@@ -8,19 +8,18 @@ import { ptBR } from '../locales/pt-BR';
 export type Messages = Record<string, string | Partial<Record<Intl.LDMLPluralRule, string>>>;
 export type Locale = 'en' | 'pt-BR';
 
-export const LOCALES: Record<Locale, { label: string; messages: Messages }> = {
-  en: { label: 'English', messages: en },
-  'pt-BR': { label: 'Português (Brasil)', messages: ptBR },
+export const LOCALES: Record<Locale, { messages: Messages }> = {
+  en: { messages: en },
+  'pt-BR': { messages: ptBR },
 };
 
-/** Best supported locale for a list of browser languages. */
-export function pickLocale(languages: readonly string[]): Locale {
-  for (const lang of languages) {
-    const lower = lang.toLowerCase();
-    if (lower.startsWith('pt')) return 'pt-BR';
-    if (lower.startsWith('en')) return 'en';
-  }
-  return 'en';
+/** The English alias host opens in English; every other host in Portuguese. */
+export function localeForHost(hostname: string): Locale {
+  return hostname.toLowerCase().startsWith('quiet.') ? 'en' : 'pt-BR';
+}
+
+export function isLocale(value: unknown): value is Locale {
+  return value === 'en' || value === 'pt-BR';
 }
 
 export type Params = Record<string, string | number>;
@@ -33,7 +32,9 @@ export function format(messages: Messages, fallback: Messages, locale: Locale, k
     template = entry;
   } else {
     const count = Number(params.count ?? 0);
-    const rule = new Intl.PluralRules(locale).select(count);
+    // Intl never answers "zero" for these locales (and Portuguese files 0
+    // under "one"), so an explicit zero form is checked first.
+    const rule = count === 0 && entry.zero !== undefined ? 'zero' : new Intl.PluralRules(locale).select(count);
     template = entry[rule] ?? entry.other ?? key;
   }
   return template.replace(/\{(\w+)\}/g, (match, name: string) => {
