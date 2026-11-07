@@ -11,6 +11,10 @@ export function post(createdAt: string, opts: { reply?: boolean; indexedAt?: str
   };
 }
 
+export function reply(createdAt: string): FeedViewPost {
+  return post(createdAt, { reply: true });
+}
+
 export function repost(at: string, originalCreatedAt = '2020-01-01T00:00:00.000Z'): FeedViewPost {
   return {
     post: {

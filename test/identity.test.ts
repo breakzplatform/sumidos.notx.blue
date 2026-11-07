@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { didDocumentUrl, normalizeActorInput, pdsEndpoint } from '../src/lib/identity';
+import { normalizeActorInput } from '../src/lib/identity';
 
 describe('normalizeActorInput', () => {
   it('accepts handles in different forms', () => {
@@ -17,22 +17,5 @@ describe('normalizeActorInput', () => {
     expect(normalizeActorInput('')).toBeNull();
     expect(normalizeActorInput('not a handle')).toBeNull();
     expect(normalizeActorInput('alice')).toBeNull();
-  });
-});
-
-describe('DID documents', () => {
-  it('knows where to fetch them', () => {
-    expect(didDocumentUrl('did:plc:abc')).toBe('https://plc.directory/did%3Aplc%3Aabc');
-    expect(didDocumentUrl('did:web:example.com')).toBe('https://example.com/.well-known/did.json');
-    expect(() => didDocumentUrl('did:key:z6Mk')).toThrow();
-  });
-
-  it('finds the PDS endpoint', () => {
-    const doc = {
-      id: 'did:plc:abc',
-      service: [{ id: '#atproto_pds', type: 'AtprotoPersonalDataServer', serviceEndpoint: 'https://pds.example' }],
-    };
-    expect(pdsEndpoint(doc)).toBe('https://pds.example');
-    expect(pdsEndpoint({ id: 'did:plc:abc' })).toBeUndefined();
   });
 });

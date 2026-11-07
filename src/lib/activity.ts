@@ -1,34 +1,22 @@
 /**
  * Working out when an account was last active, from its author feed.
+ *
+ * The feed is read once with every kind of item (posts, replies, reposts)
+ * until the first plain post shows up. Everything newer than that post is a
+ * reply or a repost, so the newest item of each kind is known exactly and
+ * the "count replies" and "count reposts" toggles only re-filter: no new
+ * request is needed when they change.
  */
-import type { ActivityMode, FeedViewPost, GetAuthorFeedResponse, LastActivity } from './types';
+import type { FeedSummary, FeedViewPost, GetAuthorFeedResponse } from './types';
 
-export const ACTIVITY_MODES: readonly ActivityMode[] = ['posts', 'posts_replies', 'all'];
+export type ItemKind = 'post' | 'reply' | 'repost' | 'pin';
 
-/** getAuthorFeed `filter` value used for each mode. */
-export function feedFilterFor(mode: ActivityMode): 'posts_no_replies' | 'posts_with_replies' {
-  return mode === 'posts' ? 'posts_no_replies' : 'posts_with_replies';
-}
-
-export function classifyItem(item: FeedViewPost): LastActivity['kind'] | 'pin' {
+export function classifyItem(item: FeedViewPost): ItemKind {
   const reasonType = item.reason?.$type ?? '';
   if (reasonType.endsWith('#reasonRepost')) return 'repost';
   if (reasonType.endsWith('#reasonPin')) return 'pin';
   if (item.post.record?.reply) return 'reply';
   return 'post';
-}
-
-export function kindMatches(kind: LastActivity['kind'] | 'pin', mode: ActivityMode): boolean {
-  switch (kind) {
-    case 'post':
-      return true;
-    case 'reply':
-      return mode !== 'posts';
-    case 'repost':
-      return mode === 'all';
-    default:
-      return false;
-  }
 }
 
 function validTime(value: string | undefined): number | undefined {
@@ -53,35 +41,51 @@ export function itemTime(item: FeedViewPost): number | undefined {
   return Math.min(created, indexed);
 }
 
-/** Most recent item that counts for `mode`, or null if none does. */
-export function pickLastActivity(items: readonly FeedViewPost[], mode: ActivityMode): LastActivity | null {
-  let best: { t: number; item: FeedViewPost; kind: LastActivity['kind'] } | null = null;
-  for (const item of items) {
-    const kind = classifyItem(item);
-    if (kind === 'pin' || !kindMatches(kind, mode)) continue;
-    const t = itemTime(item);
-    if (t === undefined) continue;
-    if (!best || t > best.t) best = { t, item, kind };
-  }
-  if (!best) return null;
-  return { at: new Date(best.t).toISOString(), kind: best.kind, uri: best.item.post.uri };
-}
+const KIND_FIELD = { post: 'lastPost', reply: 'lastReply', repost: 'lastRepost' } as const;
 
-/** Oldest timestamp among the items, any kind. */
-export function oldestTime(items: readonly FeedViewPost[]): number | undefined {
+/** Folds feed items into the newest time per kind and the oldest time seen. */
+export function summarize(items: readonly FeedViewPost[], complete: boolean): FeedSummary {
+  const newest: Partial<Record<keyof typeof KIND_FIELD, number>> = {};
   let oldest: number | undefined;
   for (const item of items) {
-    if (classifyItem(item) === 'pin') continue;
+    const kind = classifyItem(item);
+    if (kind === 'pin') continue;
     const t = itemTime(item);
-    if (t !== undefined && (oldest === undefined || t < oldest)) oldest = t;
+    if (t === undefined) continue;
+    if ((newest[kind] ?? -Infinity) < t) newest[kind] = t;
+    if (oldest === undefined || t < oldest) oldest = t;
   }
-  return oldest;
+  const summary: FeedSummary = { complete };
+  for (const kind of ['post', 'reply', 'repost'] as const) {
+    const t = newest[kind];
+    if (t !== undefined) summary[KIND_FIELD[kind]] = new Date(t).toISOString();
+  }
+  if (oldest !== undefined) summary.oldestSeen = new Date(oldest).toISOString();
+  return summary;
 }
 
-export interface ActivityResult {
-  lastActivity: LastActivity | null;
-  quietSince?: string;
-  approximate?: boolean;
+export interface CountRules {
+  replies: boolean;
+  reposts: boolean;
+}
+
+export const DEFAULT_COUNT_RULES: CountRules = { replies: true, reposts: false };
+
+/**
+ * What the feed says under the given rules:
+ * - `at`: the newest activity that counts;
+ * - `never`: the whole feed was read and nothing counts;
+ * - `atLeast`: nothing counts in what was read, which goes back to `since`.
+ */
+export type ActivityAnswer = { kind: 'at'; at: string } | { kind: 'never' } | { kind: 'atLeast'; since: string };
+
+export function lastActivity(summary: FeedSummary, rules: CountRules): ActivityAnswer {
+  const candidates = [summary.lastPost, rules.replies ? summary.lastReply : undefined, rules.reposts ? summary.lastRepost : undefined];
+  let best: string | undefined;
+  for (const at of candidates) if (at && (!best || at > best)) best = at;
+  if (best) return { kind: 'at', at: best };
+  if (summary.complete || !summary.oldestSeen) return { kind: 'never' };
+  return { kind: 'atLeast', since: summary.oldestSeen };
 }
 
 export type AuthorFeedFetcher = (params: {
@@ -92,49 +96,33 @@ export type AuthorFeedFetcher = (params: {
   signal?: AbortSignal;
 }) => Promise<GetAuthorFeedResponse>;
 
-export interface FindActivityOptions {
-  /** Keep paging when the first item doesn't count for the mode. */
-  deep: boolean;
-  /** Extra pages to read in deep mode. */
+export interface ReadFeedOptions {
+  /** Pages of `pageSize` to read after the first single-item page. */
   maxExtraPages?: number;
   pageSize?: number;
   signal?: AbortSignal;
 }
 
 /**
- * Asks for a single feed item first, which answers the question for most
- * accounts. Only when that item doesn't count (say, a repost in "posts
- * only" mode) and `deep` is on, a few more pages are read.
+ * Asks for a single item first, which answers the question for most
+ * accounts. Only when that item isn't a plain post are a few more pages
+ * read, stopping at the first plain post.
  */
-export async function findLastActivity(
+export async function readFeed(
   fetchFeed: AuthorFeedFetcher,
   actor: string,
-  mode: ActivityMode,
-  { deep, maxExtraPages = 3, pageSize = 30, signal }: FindActivityOptions,
-): Promise<ActivityResult> {
-  const filter = feedFilterFor(mode);
+  { maxExtraPages = 3, pageSize = 30, signal }: ReadFeedOptions = {},
+): Promise<FeedSummary> {
+  const filter = 'posts_with_replies';
   const seen: FeedViewPost[] = [];
+  const hasPost = () => seen.some((item) => classifyItem(item) === 'post');
+
   let res = await fetchFeed({ actor, limit: 1, filter, signal });
   seen.push(...res.feed);
-  let found = pickLastActivity(seen, mode);
-  if (found) return { lastActivity: found };
-  if (!res.cursor || res.feed.length === 0) return { lastActivity: null };
-
-  if (deep) {
-    for (let page = 0; page < maxExtraPages && res.cursor; page++) {
-      res = await fetchFeed({ actor, limit: pageSize, filter, cursor: res.cursor, signal });
-      seen.push(...res.feed);
-      found = pickLastActivity(seen, mode);
-      if (found) return { lastActivity: found };
-      if (res.feed.length === 0) break;
-    }
-    if (!res.cursor) return { lastActivity: null };
+  for (let page = 0; !hasPost() && res.cursor && res.feed.length > 0 && page < maxExtraPages; page++) {
+    res = await fetchFeed({ actor, limit: pageSize, filter, cursor: res.cursor, signal });
+    seen.push(...res.feed);
   }
-
-  const oldest = oldestTime(seen);
-  return {
-    lastActivity: null,
-    approximate: true,
-    ...(oldest !== undefined ? { quietSince: new Date(oldest).toISOString() } : {}),
-  };
+  const ended = !res.cursor || res.feed.length === 0;
+  return summarize(seen, hasPost() || ended);
 }

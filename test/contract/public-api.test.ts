@@ -1,18 +1,17 @@
 /**
  * Contract test against the real public Bluesky API. Skipped unless
- * QUIET_CONTRACT=1 is set (npm run test:contract). It checks that the
+ * SUMIDOS_CONTRACT=1 is set (npm run test:contract). It checks that the
  * response fields this app depends on still exist and have the right types.
  * It makes about a dozen requests.
  */
 import { describe, expect, it } from 'vitest';
-import { AppViewReader, PdsRepoClient, PUBLIC_APPVIEW } from '../../src/lib/bsky';
-import { pdsEndpoint, resolveDidDocument } from '../../src/lib/identity';
-import { scan } from '../../src/lib/scan';
-import { MemoryScanStore } from '../../src/lib/cache';
+import { readFeed } from '../../src/lib/activity';
+import { AppViewReader, PUBLIC_APPVIEW } from '../../src/lib/bsky';
+import { resolveSubject } from '../../src/lib/scan';
 import { XrpcClient, XrpcError, serviceFetchHandler } from '../../src/lib/xrpc';
 
-const enabled = process.env.QUIET_CONTRACT === '1';
-const ACTOR = process.env.QUIET_CONTRACT_ACTOR ?? 'bsky.app';
+const enabled = process.env.SUMIDOS_CONTRACT === '1';
+const ACTOR = process.env.SUMIDOS_CONTRACT_ACTOR ?? 'bsky.app';
 const TIMEOUT = 60_000;
 
 const client = new XrpcClient(serviceFetchHandler(PUBLIC_APPVIEW), {
@@ -76,23 +75,7 @@ describe.skipIf(!enabled)('public API contract', () => {
     TIMEOUT,
   );
 
-  it(
-    'getRelationships reports follow records and follow-backs by DID',
-    async () => {
-      const res = await reader.getRelationships(did, follows.slice(0, 5).map((f) => f.did));
-      expect(res.relationships.length).toBeGreaterThan(0);
-      for (const r of res.relationships) {
-        if (r.notFound) continue;
-        expect(r.did).toSatisfy(isString);
-        // The scanned account follows all of these, so the URI must be there.
-        expect(r.following).toMatch(new RegExp(`^at://${did}/app\\.bsky\\.graph\\.follow/`));
-        if (r.followedBy !== undefined) expect(r.followedBy).toMatch(/^at:\/\/did:.+\/app\.bsky\.graph\.follow\//);
-      }
-    },
-    TIMEOUT,
-  );
-
-  it.each(['posts_no_replies', 'posts_with_replies'])(
+  it.each(['posts_with_replies'])(
     'getAuthorFeed (%s) items have the fields used for last activity',
     async (filter) => {
       const res = await reader.getAuthorFeed({ actor: did, limit: 5, filter });
@@ -123,31 +106,14 @@ describe.skipIf(!enabled)('public API contract', () => {
   );
 
   it(
-    'the DID document names a PDS that lists follow records publicly',
+    'the subject resolves and feeds read end to end',
     async () => {
-      const doc = await resolveDidDocument(did);
-      const pds = pdsEndpoint(doc);
-      expect(pds).toMatch(/^https:\/\//);
-      const repo = new PdsRepoClient(new XrpcClient(serviceFetchHandler(pds!)));
-      const res = await repo.listFollows(did, undefined);
-      expect(res.records.length).toBeGreaterThan(0);
-      const rec = res.records[0]!;
-      expect(rec.uri).toMatch(new RegExp(`^at://${did}/app\\.bsky\\.graph\\.follow/`));
-      expect(rec.value.subject).toMatch(/^did:/);
-    },
-    TIMEOUT,
-  );
-
-  it(
-    'a quick scan with a tiny sample runs end to end',
-    async () => {
-      const res = await scan(
-        { reader, store: new MemoryScanStore() },
-        { actor: ACTOR, mode: 'posts', scanType: 'quick', concurrency: 2, maxAgeMs: 0, sampleSize: 3 },
-      );
-      expect(res.did).toBe(did);
-      expect(res.accounts.length).toBeGreaterThan(0);
-      expect(res.stats.fetched + res.stats.skipped).toBeGreaterThan(0);
+      const subject = await resolveSubject(reader, ACTOR);
+      expect(subject.did).toBe(did);
+      for (const f of follows.slice(0, 3)) {
+        const summary = await readFeed((p) => reader.getAuthorFeed(p, {}), f.did);
+        expect(typeof summary.complete).toBe('boolean');
+      }
     },
     TIMEOUT * 3,
   );

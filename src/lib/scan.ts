@@ -1,71 +1,70 @@
 /**
- * The scan: list who an account follows, enrich each followed account with
- * profile counts and follow-back state, then find its last activity. Fresh
- * cached activity is reused so rescans only fetch what went stale.
+ * The scan: list who an account follows, add profile counts, then read each
+ * followed account's feed. Accounts are reported as soon as their feed is
+ * read so the list fills in while the scan runs. Nothing is stored.
+ *
+ * Without a session the scan only uses public AppView data for the handle
+ * that was typed. With a session for that same account, its own follow
+ * records are also listed from its PDS: they include follows the AppView
+ * no longer shows (deactivated or deleted accounts).
  */
-import { findLastActivity } from './activity';
+import { readFeed } from './activity';
 import { isAbortError } from './backoff';
 import type { BskyReader, RepoClient } from './bsky';
-import { isStale, type ScanStore } from './cache';
 import { chunk, paginate } from './paginate';
 import { runPool } from './pool';
-import type { Account, AccountStatus, ActivityMode, ProfileView, ProfileViewDetailed } from './types';
+import type { Account, AccountStatus, ProfileView, ProfileViewDetailed } from './types';
 import { XrpcError } from './xrpc';
 
-export type ScanType = 'full' | 'quick';
+/** Requests in flight at once. Fixed: this is a public API. */
+export const SCAN_CONCURRENCY = 4;
 
-export type ScanPhase = 'resolve' | 'follows' | 'records' | 'profiles' | 'relationships' | 'activity' | 'saving';
+/** From this many follows the page warns that the scan takes a while. */
+export const LARGE_LIST = 500;
+
+export type ScanPhase = 'resolve' | 'follows' | 'records' | 'profiles' | 'feeds';
 
 export interface ScanProgress {
   phase: ScanPhase;
   done: number;
-  /** 0 when unknown (e.g. while paging through follows). */
+  /** 0 when unknown. */
   total: number;
+}
+
+export interface ScanSubject {
+  did: string;
+  handle: string;
+  followsCount?: number;
 }
 
 export interface ScanDeps {
   reader: BskyReader;
-  store: ScanStore;
-  now?: () => number;
-  random?: () => number;
-  /** Repo client for the scanned account's PDS (full scans only). */
-  repoFor?: (did: string, signal?: AbortSignal) => Promise<RepoClient>;
+  /**
+   * The scanned account's own repo, only when it is the logged-in account.
+   * Called once the handle is resolved to a DID.
+   */
+  ownRepoFor?: (did: string) => RepoClient | undefined;
 }
 
 export interface ScanOptions {
   actor: string;
-  mode: ActivityMode;
-  scanType: ScanType;
-  concurrency: number;
-  maxAgeMs: number;
-  /** Quick scan: only check activity for this many random accounts. */
-  sampleSize?: number;
-  /** Ignore cached activity. */
-  force?: boolean;
   signal?: AbortSignal;
+  concurrency?: number;
+  onSubject?: (subject: ScanSubject) => void;
   onProgress?: (p: ScanProgress) => void;
-}
-
-export interface ScanStats {
-  follows: number;
-  fetched: number;
-  fromCache: number;
-  skipped: number;
-  failed: number;
+  /** Called whenever an account's data changes (profile or feed read). */
+  onAccount?: (a: Account) => void;
 }
 
 export interface ScanResult {
-  did: string;
-  handle: string;
+  subject: ScanSubject;
   accounts: Account[];
-  stats: ScanStats;
   cancelled: boolean;
-  scannedAt: number;
 }
 
 export class ActorError extends Error {
   constructor(
-    readonly code: 'notfound' | 'deactivated' | 'takendown' | 'invalid',
+    readonly code: 'notfound' | 'deactivated' | 'takendown',
     message: string,
   ) {
     super(message);
@@ -78,9 +77,8 @@ export function statusFromError(err: unknown): AccountStatus {
   if (err instanceof XrpcError) {
     if (err.error === 'AccountDeactivated') return 'deactivated';
     if (err.error === 'AccountTakedown') return 'takendown';
-    if (err.error === 'BlockedActor' || err.error === 'BlockedByActor') return 'blocked';
-    if (err.status === 400 && /not found/i.test(err.message)) return 'notfound';
     if (err.error === 'NotFound' || err.error === 'ProfileNotFound') return 'notfound';
+    if (err.status === 400 && /not found/i.test(err.message)) return 'notfound';
   }
   return 'error';
 }
@@ -89,7 +87,6 @@ function fromProfileView(p: ProfileView): Account {
   const a: Account = { did: p.did, handle: p.handle, status: 'active' };
   if (p.displayName) a.displayName = p.displayName;
   if (p.avatar) a.avatar = p.avatar;
-  if (p.createdAt) a.createdAt = p.createdAt;
   return a;
 }
 
@@ -97,251 +94,142 @@ function applyDetailed(a: Account, p: ProfileViewDetailed): void {
   a.handle = p.handle;
   a.status = 'active';
   if (p.displayName) a.displayName = p.displayName;
-  else delete a.displayName;
   if (p.avatar) a.avatar = p.avatar;
-  else delete a.avatar;
-  if (p.createdAt) a.createdAt = p.createdAt;
-  if (p.followersCount !== undefined) a.followersCount = p.followersCount;
-  if (p.followsCount !== undefined) a.followsCount = p.followsCount;
   if (p.postsCount !== undefined) a.postsCount = p.postsCount;
 }
 
-const ACTIVITY_FIELDS = ['lastActivity', 'quietSince', 'approximate', 'activityMode', 'checkedAt'] as const;
-
-function copyActivity(from: Account, to: Account): void {
-  for (const key of ACTIVITY_FIELDS) {
-    if (from[key] !== undefined) (to as unknown as Record<string, unknown>)[key] = from[key];
-  }
+function errorText(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
 }
 
-function clearActivity(a: Account): void {
-  for (const key of ACTIVITY_FIELDS) delete a[key];
-  delete a.errorMessage;
-}
-
-function sample<T>(items: T[], n: number, random: () => number): T[] {
-  const copy = items.slice();
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j]!, copy[i]!];
-  }
-  return copy.slice(0, n);
-}
-
-export async function scan(deps: ScanDeps, opts: ScanOptions): Promise<ScanResult> {
-  const now = deps.now ?? Date.now;
-  const random = deps.random ?? Math.random;
-  const { signal, onProgress } = opts;
-  const deep = opts.scanType === 'full';
-  const call = { signal };
-  const stats: ScanStats = { follows: 0, fetched: 0, fromCache: 0, skipped: 0, failed: 0 };
-
-  // 1. Resolve the actor (getProfile accepts both handles and DIDs).
-  onProgress?.({ phase: 'resolve', done: 0, total: 1 });
-  let subject: ProfileViewDetailed;
+/** Reads one account's feed into it; failures become its status. */
+async function readAccountFeed(reader: BskyReader, a: Account, signal?: AbortSignal): Promise<void> {
   try {
-    subject = await deps.reader.getProfile(opts.actor, call);
+    a.feed = await readFeed(({ signal: s, ...p }) => reader.getAuthorFeed(p, { signal: s }), a.did, { signal });
+    a.status = 'active';
+    delete a.errorMessage;
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    a.status = statusFromError(err);
+    if (a.status === 'error') a.errorMessage = errorText(err);
+  }
+}
+
+/** Resolves a handle or DID to the account whose follows will be listed. */
+export async function resolveSubject(reader: BskyReader, actor: string, signal?: AbortSignal): Promise<ScanSubject> {
+  try {
+    const p = await reader.getProfile(actor, { signal });
+    const subject: ScanSubject = { did: p.did, handle: p.handle };
+    if (p.followsCount !== undefined) subject.followsCount = p.followsCount;
+    return subject;
   } catch (err) {
     if (isAbortError(err)) throw err;
     const status = statusFromError(err);
-    if (status === 'deactivated' || status === 'takendown' || status === 'notfound') {
-      throw new ActorError(status, opts.actor);
-    }
-    if (err instanceof XrpcError && err.status === 400) throw new ActorError('notfound', opts.actor);
+    if (status === 'deactivated' || status === 'takendown' || status === 'notfound') throw new ActorError(status, actor);
+    if (err instanceof XrpcError && err.status === 400) throw new ActorError('notfound', actor);
     throw err;
   }
+}
+
+export async function scan(deps: ScanDeps, opts: ScanOptions): Promise<ScanResult> {
+  const { signal, onProgress, onAccount } = opts;
+  const concurrency = opts.concurrency ?? SCAN_CONCURRENCY;
+  const call = { signal };
+
+  onProgress?.({ phase: 'resolve', done: 0, total: 1 });
+  const subject = await resolveSubject(deps.reader, opts.actor, signal);
+  opts.onSubject?.(subject);
   const did = subject.did;
-  const cached = opts.force ? undefined : await deps.store.get(did);
-  const cachedByDid = new Map((cached?.accounts ?? []).map((a) => [a.did, a]));
 
-  // 2. Everyone they follow, per the AppView.
   const accounts = new Map<string, Account>();
-  for await (const page of paginate(
-    async (cursor) => {
-      const res = await deps.reader.getFollows(did, cursor, call);
-      return { items: res.follows, cursor: res.cursor };
-    },
-    { signal },
-  )) {
-    for (const p of page) if (!accounts.has(p.did)) accounts.set(p.did, fromProfileView(p));
-    onProgress?.({ phase: 'follows', done: accounts.size, total: subject.followsCount ?? 0 });
-  }
+  const all = () => [...accounts.values()];
+  let cancelled = false;
 
-  // 3. Full scan: the follow records in their repo. These also include
-  // follows of accounts the AppView no longer lists (deleted, suspended).
-  if (deep && deps.repoFor) {
-    try {
-      const repo = await deps.repoFor(did, signal);
+  try {
+    // 1. Everyone they follow, per the AppView.
+    for await (const page of paginate(
+      async (cursor) => {
+        const res = await deps.reader.getFollows(did, cursor, call);
+        return { items: res.follows, cursor: res.cursor };
+      },
+      { signal },
+    )) {
+      for (const p of page) if (!accounts.has(p.did)) accounts.set(p.did, fromProfileView(p));
+      onProgress?.({ phase: 'follows', done: accounts.size, total: subject.followsCount ?? 0 });
+    }
+
+    // 2. Own list only: follow records the AppView no longer lists.
+    const ownRepo = deps.ownRepoFor?.(did);
+    if (ownRepo) {
       let seen = 0;
       for await (const page of paginate(
         async (cursor) => {
-          const res = await repo.listFollows(did, cursor, call);
+          const res = await ownRepo.listFollows(did, cursor, call);
           return { items: res.records, cursor: res.cursor };
         },
         { signal },
       )) {
         for (const rec of page) {
-          const subjectDid = rec.value?.subject;
-          if (typeof subjectDid !== 'string') continue;
-          let a = accounts.get(subjectDid);
-          if (!a) {
-            a = { did: subjectDid, handle: subjectDid, status: 'notfound' };
-            accounts.set(subjectDid, a);
-          }
-          a.followUri ??= rec.uri;
+          const followed = rec.value?.subject;
+          if (typeof followed !== 'string' || accounts.has(followed)) continue;
+          accounts.set(followed, { did: followed, handle: followed, status: 'notfound' });
         }
         seen += page.length;
-        onProgress?.({ phase: 'records', done: seen, total: 0 });
+        onProgress?.({ phase: 'records', done: seen, total: subject.followsCount ?? 0 });
       }
-    } catch (err) {
-      if (isAbortError(err)) throw err;
-      // Optional step: the AppView list is still usable without it.
     }
-  }
 
-  const all = [...accounts.values()];
-  stats.follows = all.length;
-
-  // 4. Profile details (counts) in batches of 25.
-  const batches = chunk(all.map((a) => a.did), 25);
-  const missing: string[] = [];
-  let profilesDone = 0;
-  await runPool(
-    batches,
-    async (dids) => {
-      const res = await deps.reader.getProfiles(dids, call);
-      const found = new Set<string>();
-      for (const p of res.profiles) {
-        const a = accounts.get(p.did);
-        if (a) {
+    // 3. Post counts in batches of 25; accounts left out are asked one by
+    // one so their status (deactivated, suspended, gone) is known.
+    const batches = chunk(all().map((a) => a.did), 25);
+    const missing: string[] = [];
+    await runPool(
+      batches,
+      async (dids) => {
+        const res = await deps.reader.getProfiles(dids, call);
+        const found = new Set<string>();
+        for (const p of res.profiles) {
+          const a = accounts.get(p.did);
+          if (!a) continue;
           applyDetailed(a, p);
           found.add(p.did);
         }
-      }
-      for (const d of dids) if (!found.has(d)) missing.push(d);
-    },
-    {
-      concurrency: opts.concurrency,
-      signal,
-      onSettled: ({ result }) => {
-        profilesDone++;
-        if (!result.ok && !isAbortError(result.error)) stats.failed++;
-        onProgress?.({ phase: 'profiles', done: profilesDone, total: batches.length });
-      },
-    },
-  );
-
-  // Accounts getProfiles left out: ask one by one to learn why.
-  await runPool(
-    missing,
-    async (d) => {
-      const a = accounts.get(d)!;
-      try {
-        applyDetailed(a, await deps.reader.getProfile(d, call));
-      } catch (err) {
-        if (isAbortError(err)) throw err;
-        a.status = statusFromError(err);
-        if (a.status === 'error') a.errorMessage = err instanceof Error ? err.message : String(err);
-        clearActivity(a);
-      }
-    },
-    { concurrency: opts.concurrency, signal },
-  );
-
-  // 5. Follow-back state and follow record URIs, in batches of 30.
-  const relBatches = chunk(all.filter((a) => a.status === 'active').map((a) => a.did), 30);
-  let relDone = 0;
-  await runPool(
-    relBatches,
-    async (dids) => {
-      const res = await deps.reader.getRelationships(did, dids, call);
-      for (const rel of res.relationships) {
-        if (rel.notFound || !rel.did) continue;
-        const a = accounts.get(rel.did);
-        if (!a) continue;
-        a.mutual = Boolean(rel.followedBy);
-        if (rel.following) a.followUri = rel.following;
-      }
-    },
-    {
-      concurrency: opts.concurrency,
-      signal,
-      onSettled: () => {
-        relDone++;
-        onProgress?.({ phase: 'relationships', done: relDone, total: relBatches.length });
-      },
-    },
-  );
-
-  // 6. Last activity, reusing fresh cache entries.
-  const checkTime = now();
-  const staleOpts = { now: checkTime, maxAgeMs: opts.maxAgeMs, mode: opts.mode, deep };
-  let toFetch: Account[] = [];
-  for (const a of all) {
-    if (a.status !== 'active') continue;
-    const prev = cachedByDid.get(a.did);
-    if (prev && prev.status === 'active' && !isStale(prev, staleOpts)) {
-      copyActivity(prev, a);
-      stats.fromCache++;
-      continue;
-    }
-    if (a.postsCount === 0 && opts.mode !== 'all') {
-      // Nothing to look for; no request needed.
-      a.lastActivity = null;
-      a.activityMode = opts.mode;
-      a.checkedAt = checkTime;
-      stats.skipped++;
-      continue;
-    }
-    toFetch.push(a);
-  }
-
-  if (!deep && opts.sampleSize && opts.sampleSize > 0 && toFetch.length > opts.sampleSize) {
-    const chosen = new Set(sample(toFetch, opts.sampleSize, random));
-    for (const a of toFetch) {
-      if (chosen.has(a)) continue;
-      // Not sampled this time: keep whatever older result we had.
-      const prev = cachedByDid.get(a.did);
-      if (prev && prev.activityMode === opts.mode) copyActivity(prev, a);
-    }
-    toFetch = toFetch.filter((a) => chosen.has(a));
-  }
-
-  let cancelled = false;
-  try {
-    await runPool(
-      toFetch,
-      async (a, _i, sig) => {
-        try {
-          const res = await findLastActivity(
-            ({ signal: s, ...p }) => deps.reader.getAuthorFeed(p, { signal: s }),
-            a.did,
-            opts.mode,
-            { deep, signal: sig },
-          );
-          clearActivity(a);
-          a.lastActivity = res.lastActivity;
-          if (res.quietSince) a.quietSince = res.quietSince;
-          if (res.approximate) a.approximate = true;
-          a.activityMode = opts.mode;
-          a.checkedAt = now();
-          stats.fetched++;
-        } catch (err) {
-          if (isAbortError(err)) throw err;
-          const status = statusFromError(err);
-          if (status !== 'error') {
-            a.status = status;
-            clearActivity(a);
-          } else {
-            a.errorMessage = err instanceof Error ? err.message : String(err);
-          }
-          stats.failed++;
-        }
+        for (const d of dids) if (!found.has(d)) missing.push(d);
       },
       {
-        concurrency: opts.concurrency,
+        concurrency,
         signal,
-        onSettled: ({ done, total }) => onProgress?.({ phase: 'activity', done, total }),
+        onSettled: ({ done, total }) => onProgress?.({ phase: 'profiles', done, total }),
+      },
+    );
+    await runPool(
+      missing,
+      async (d) => {
+        const a = accounts.get(d)!;
+        try {
+          applyDetailed(a, await deps.reader.getProfile(d, call));
+        } catch (err) {
+          if (isAbortError(err)) throw err;
+          a.status = statusFromError(err);
+          if (a.status === 'error') a.errorMessage = errorText(err);
+          else onAccount?.(a);
+        }
+      },
+      { concurrency, signal },
+    );
+
+    // 4. Feeds.
+    const toRead = all().filter((a) => a.status === 'active');
+    await runPool(
+      toRead,
+      async (a, _i, sig) => {
+        await readAccountFeed(deps.reader, a, sig);
+        onAccount?.(a);
+      },
+      {
+        concurrency,
+        signal,
+        onSettled: ({ done, total }) => onProgress?.({ phase: 'feeds', done, total }),
       },
     );
   } catch (err) {
@@ -349,17 +237,35 @@ export async function scan(deps: ScanDeps, opts: ScanOptions): Promise<ScanResul
     cancelled = true;
   }
 
-  // 7. Save, including partial progress after a cancel.
-  onProgress?.({ phase: 'saving', done: 0, total: 1 });
-  const scannedAt = now();
-  const result: ScanResult = {
-    did,
-    handle: subject.handle,
-    accounts: all,
-    stats,
-    cancelled,
-    scannedAt,
-  };
-  await deps.store.put({ did, handle: subject.handle, mode: opts.mode, scannedAt, accounts: all });
-  return result;
+  return { subject, accounts: all(), cancelled };
+}
+
+/**
+ * Picks up a stopped scan: reads the feeds that are still missing (or
+ * failed) and leaves everything else as it was.
+ */
+export async function resumeFeeds(
+  deps: Pick<ScanDeps, 'reader'>,
+  accounts: readonly Account[],
+  opts: Pick<ScanOptions, 'signal' | 'concurrency' | 'onProgress' | 'onAccount'>,
+): Promise<{ cancelled: boolean }> {
+  const pending = accounts.filter((a) => (a.status === 'active' && !a.feed) || a.status === 'error');
+  try {
+    await runPool(
+      pending,
+      async (a, _i, sig) => {
+        await readAccountFeed(deps.reader, a, sig);
+        opts.onAccount?.(a);
+      },
+      {
+        concurrency: opts.concurrency ?? SCAN_CONCURRENCY,
+        signal: opts.signal,
+        onSettled: ({ done, total }) => opts.onProgress?.({ phase: 'feeds', done, total }),
+      },
+    );
+    return { cancelled: false };
+  } catch (err) {
+    if (!isAbortError(err)) throw err;
+    return { cancelled: true };
+  }
 }

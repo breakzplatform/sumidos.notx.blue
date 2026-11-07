@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { accountsToCsv, csvField, profileUrl } from '../src/lib/csv';
-import type { Account } from '../src/lib/types';
-
-const NOW = Date.parse('2026-10-19T00:00:00.000Z');
+import { csvField, profileUrl, rowsToCsv } from '../src/lib/csv';
+import type { Row } from '../src/lib/inactivity';
 
 describe('csvField', () => {
   it('quotes commas, quotes and newlines', () => {
@@ -31,33 +29,22 @@ describe('profileUrl', () => {
   });
 });
 
-describe('accountsToCsv', () => {
-  it('writes a header and one row per account', () => {
-    const accounts: Account[] = [
+describe('rowsToCsv', () => {
+  it('writes a header and one line per row, in order', () => {
+    const rows: Row[] = [
       {
-        did: 'did:plc:a',
-        handle: 'alice.test',
-        displayName: 'Alice, "A"',
-        status: 'active',
-        mutual: false,
-        postsCount: 3,
-        followersCount: 10,
-        followsCount: 2,
-        avatar: 'x',
-        lastActivity: { at: '2026-10-09T00:00:00.000Z', kind: 'post', uri: 'at://x' },
+        account: { did: 'did:plc:a', handle: 'alice.test', displayName: 'Alice, "A"', status: 'active' },
+        standing: { kind: 'at', at: '2026-01-01T00:00:00.000Z' },
+        days: 300,
       },
-      { did: 'did:plc:b', handle: 'bob.test', status: 'deactivated' },
+      { account: { did: 'did:plc:b', handle: 'bob.test', status: 'deactivated' }, standing: { kind: 'unavailable' }, days: Infinity },
+      { account: { did: 'did:plc:c', handle: 'carol.test', status: 'active' }, standing: { kind: 'atLeast', since: '2026-01-01T00:00:00.000Z' }, days: 120 },
     ];
-    const csv = accountsToCsv(accounts, NOW, new Set(['did:plc:b']));
-    const lines = csv.trimEnd().split('\r\n');
-    expect(lines).toHaveLength(3);
-    expect(lines[0]).toBe(
-      'handle,did,display_name,profile_url,status,last_activity_at,last_activity_kind,inactive_days,quiet_since,never_posted,mutual,followers,following,posts,ghost_signals,allowlisted',
-    );
-    expect(lines[1]).toBe(
-      'alice.test,did:plc:a,"Alice, ""A""",https://bsky.app/profile/alice.test,active,2026-10-09T00:00:00.000Z,post,10,,false,false,10,2,3,,false',
-    );
-    expect(lines[2]).toBe('bob.test,did:plc:b,,https://bsky.app/profile/bob.test,deactivated,,,,,false,,,,,,true');
-    expect(csv.endsWith('\r\n')).toBe(true);
+    const lines = rowsToCsv(rows).split('\r\n');
+    expect(lines[0]).toBe('handle,did,display_name,profile_url,status,last_activity_at,inactive_days,at_least,never_posted');
+    expect(lines[1]).toBe('alice.test,did:plc:a,"Alice, ""A""",https://bsky.app/profile/alice.test,active,2026-01-01T00:00:00.000Z,300,false,false');
+    expect(lines[2]).toBe('bob.test,did:plc:b,,https://bsky.app/profile/bob.test,deactivated,,,false,false');
+    expect(lines[3]).toBe('carol.test,did:plc:c,,https://bsky.app/profile/carol.test,active,,120,true,false');
+    expect(lines[4]).toBe('');
   });
 });

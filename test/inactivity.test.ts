@@ -1,153 +1,81 @@
 import { describe, expect, it } from 'vitest';
-import {
-  DEFAULT_FILTERS,
-  filterAccounts,
-  ghostSignals,
-  inactiveDays,
-  isLikelyGhost,
-  isNeverPosted,
-  sortAccounts,
-} from '../src/lib/inactivity';
+import { DEFAULT_COUNT_RULES } from '../src/lib/activity';
+import { DEFAULT_MIN_DAYS, inactiveDays, isMinDays, matchesSearch, standing, visibleRows } from '../src/lib/inactivity';
 import type { Account } from '../src/lib/types';
 import { DAY } from './helpers';
 
-const NOW = Date.parse('2026-10-19T12:00:00.000Z');
-const ago = (days: number) => new Date(NOW - days * DAY).toISOString();
+const NOW = Date.parse('2026-11-06T00:00:00.000Z');
+const ago = (d: number) => new Date(NOW - d * DAY).toISOString();
 
-function acct(handle: string, extra: Partial<Account> = {}): Account {
-  return {
-    did: `did:plc:${handle}`,
-    handle: `${handle}.test`,
-    displayName: handle.toUpperCase(),
-    avatar: 'https://cdn.example/a.jpg',
-    status: 'active',
-    postsCount: 10,
-    followersCount: 50,
-    followsCount: 20,
-    createdAt: ago(1000),
-    mutual: true,
-    ...extra,
-  };
+function account(handle: string, extra: Partial<Account> = {}): Account {
+  return { did: `did:plc:${handle}`, handle, status: 'active', ...extra };
 }
 
-const active = acct('active', { lastActivity: { at: ago(2), kind: 'post', uri: 'at://x' } });
-const quiet = acct('quiet', { lastActivity: { at: ago(200), kind: 'post', uri: 'at://x' }, mutual: false });
-const lowerBound = acct('lower', { lastActivity: null, quietSince: ago(120), approximate: true });
-const never = acct('never', { lastActivity: null, postsCount: 0 });
-const gone = acct('gone', { status: 'deactivated' });
-const unchecked = acct('unchecked');
+const rules = DEFAULT_COUNT_RULES;
 
-describe('inactiveDays', () => {
-  it('counts whole days since the last activity', () => {
-    expect(inactiveDays(active, NOW)).toBe(2);
-    expect(inactiveDays(quiet, NOW)).toBe(200);
-  });
-  it('uses quietSince as a lower bound', () => {
-    expect(inactiveDays(lowerBound, NOW)).toBe(120);
-  });
-  it('is Infinity for never posted and unavailable accounts', () => {
-    expect(inactiveDays(never, NOW)).toBe(Infinity);
-    expect(inactiveDays(gone, NOW)).toBe(Infinity);
-  });
-  it('is undefined when not checked yet', () => {
-    expect(inactiveDays(unchecked, NOW)).toBeUndefined();
-  });
-});
-
-describe('isNeverPosted', () => {
-  it('trusts postsCount = 0', () => {
-    expect(isNeverPosted(never)).toBe(true);
-    expect(isNeverPosted(quiet)).toBe(false);
-    expect(isNeverPosted(gone)).toBe(false);
-  });
-  it('without counts, needs an empty feed', () => {
-    expect(isNeverPosted(acct('x', { postsCount: undefined, lastActivity: null }))).toBe(true);
-    expect(isNeverPosted(acct('y', { postsCount: undefined, lastActivity: null, quietSince: ago(3) }))).toBe(false);
-  });
-});
-
-describe('sortAccounts', () => {
-  const list = [active, unchecked, quiet, never, lowerBound, gone];
-
-  it('puts the most inactive first and unchecked last', () => {
-    const order = sortAccounts(list, 'inactivity', 'desc', NOW).map((a) => a.handle);
-    expect(order).toEqual(['gone.test', 'never.test', 'quiet.test', 'lower.test', 'active.test', 'unchecked.test']);
+describe('standing and inactiveDays', () => {
+  it('is pending until the feed is read', () => {
+    expect(standing(account('a'), rules)).toEqual({ kind: 'pending' });
+    expect(inactiveDays({ kind: 'pending' }, NOW)).toBeUndefined();
   });
 
-  it('ascending keeps unchecked last too', () => {
-    const order = sortAccounts(list, 'inactivity', 'asc', NOW).map((a) => a.handle);
-    expect(order[0]).toBe('active.test');
-    expect(order.at(-1)).toBe('unchecked.test');
+  it('treats accounts that cannot post as quiet forever', () => {
+    const s = standing(account('a', { status: 'deactivated' }), rules);
+    expect(s).toEqual({ kind: 'unavailable' });
+    expect(inactiveDays(s, NOW)).toBe(Infinity);
   });
 
-  it('sorts by name and by counts', () => {
-    const byName = sortAccounts([quiet, active, never], 'name', 'asc', NOW).map((a) => a.handle);
-    expect(byName).toEqual(['active.test', 'never.test', 'quiet.test']);
-    const a = acct('a', { followersCount: 5 });
-    const b = acct('b', { followersCount: 500 });
-    expect(sortAccounts([a, b], 'followers', 'desc', NOW)[0]).toBe(b);
-  });
-});
-
-describe('filterAccounts', () => {
-  const list = [active, quiet, never, lowerBound, gone, unchecked];
-  const f = { ...DEFAULT_FILTERS, minDays: 0 };
-
-  it('filters by minimum inactivity (strictly more than N days)', () => {
-    const r = filterAccounts(list, { ...f, minDays: 120 }, NOW).map((a) => a.handle);
-    expect(r).toEqual(['quiet.test', 'never.test', 'gone.test']);
-    expect(filterAccounts(list, { ...f, minDays: 119 }, NOW)).toContain(lowerBound);
-  });
-
-  it('only non-mutuals (unknown mutual state is excluded)', () => {
-    expect(filterAccounts(list, { ...f, onlyNonMutual: true }, NOW)).toEqual([quiet]);
-  });
-
-  it('only never posted', () => {
-    expect(filterAccounts(list, { ...f, onlyNeverPosted: true }, NOW)).toEqual([never]);
-  });
-
-  it('search matches handle, display name and DID', () => {
-    expect(filterAccounts(list, { ...f, search: '@QUIET' }, NOW)).toEqual([quiet]);
-    expect(filterAccounts(list, { ...f, search: 'NEVER' }, NOW)).toEqual([never]);
-    expect(filterAccounts(list, { ...f, search: 'did:plc:gone' }, NOW)).toEqual([gone]);
-  });
-
-  it('can hide allowlisted accounts', () => {
-    const r = filterAccounts(list, { ...f, hideAllowlisted: true }, NOW, new Set([quiet.did]));
-    expect(r).not.toContain(quiet);
-  });
-});
-
-describe('ghost heuristics', () => {
-  it('a normal account has no signals', () => {
-    expect(ghostSignals(quiet, NOW)).toEqual([]);
-  });
-
-  it('collects the simple signals', () => {
-    const ghost = acct('ghost', {
-      avatar: undefined,
-      displayName: '',
-      createdAt: ago(5),
-      postsCount: 0,
-      followersCount: 0,
+  it('counts whole days since the last activity that counts', () => {
+    const s = standing(account('a', { feed: { lastPost: ago(100), lastReply: ago(10), complete: true } }), rules);
+    expect(inactiveDays(s, NOW)).toBe(10);
+    const strict = standing(account('a', { feed: { lastPost: ago(100), lastReply: ago(10), complete: true } }), {
+      replies: false,
+      reposts: false,
     });
-    expect(ghostSignals(ghost, NOW)).toEqual(['no-avatar', 'no-name', 'new-account', 'no-posts', 'no-followers']);
-    expect(isLikelyGhost(ghost, NOW)).toBe(true);
+    expect(inactiveDays(strict, NOW)).toBe(100);
+  });
+});
+
+describe('visibleRows', () => {
+  const accounts = [
+    account('recent', { feed: { lastPost: ago(5), complete: true } }),
+    account('quiet', { feed: { lastPost: ago(200), complete: true } }),
+    account('quieter', { feed: { lastPost: ago(400), complete: true } }),
+    account('never', { feed: { complete: true } }),
+    account('gone', { status: 'deactivated' }),
+    account('pending'),
+    account('broken', { status: 'error' }),
+    account('replier', { feed: { lastPost: ago(300), lastReply: ago(2), complete: true } }),
+  ];
+
+  it('defaults to 90 days', () => {
+    expect(DEFAULT_MIN_DAYS).toBe(90);
   });
 
-  it('treats a display name equal to the handle as empty', () => {
-    expect(ghostSignals(acct('x', { displayName: 'x.test' }), NOW)).toContain('no-name');
-    expect(ghostSignals(acct('x', { displayName: 'x' }), NOW)).toContain('no-name');
+  it('orders unavailable, never posted, then most days', () => {
+    const rows = visibleRows(accounts, { rules, minDays: 90, search: '' }, NOW);
+    expect(rows.map((r) => r.account.handle)).toEqual(['gone', 'never', 'quieter', 'quiet']);
   });
 
-  it('needs enough signals', () => {
-    const twoSignals = acct('half', { avatar: undefined, displayName: undefined });
-    expect(isLikelyGhost(twoSignals, NOW)).toBe(false);
-    expect(isLikelyGhost(twoSignals, NOW, { newAccountDays: 30, threshold: 2 })).toBe(true);
+  it('re-filters when the rules change, without new data', () => {
+    const rows = visibleRows(accounts, { rules: { replies: false, reposts: false }, minDays: 90, search: '' }, NOW);
+    expect(rows.map((r) => r.account.handle)).toContain('replier');
   });
 
-  it('does not flag unavailable accounts', () => {
-    expect(ghostSignals(acct('z', { status: 'takendown', avatar: undefined }), NOW)).toEqual([]);
+  it('applies the threshold', () => {
+    const rows = visibleRows(accounts, { rules, minDays: 365, search: '' }, NOW);
+    expect(rows.map((r) => r.account.handle)).toEqual(['gone', 'never', 'quieter']);
+  });
+
+  it('searches by name or handle', () => {
+    expect(matchesSearch(account('quiet.test', { displayName: 'Maria' }), '@quiet')).toBe(true);
+    expect(matchesSearch(account('x.test', { displayName: 'Maria' }), 'mar')).toBe(true);
+    expect(matchesSearch(account('x.test'), 'zzz')).toBe(false);
+  });
+
+  it('only accepts the offered thresholds', () => {
+    expect(isMinDays('180')).toBe(true);
+    expect(isMinDays('0')).toBe(false);
+    expect(isMinDays(null)).toBe(false);
   });
 });
