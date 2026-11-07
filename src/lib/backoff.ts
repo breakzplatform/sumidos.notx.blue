@@ -86,8 +86,10 @@ export function isRetryableStatus(status: number): boolean {
 
 /**
  * How long to wait before retrying after a failed response. Server hints
- * win over our own schedule, but are capped so a bogus header can't stall
- * the app for hours.
+ * can stretch our own schedule but never shorten it: a reset already in
+ * the past (clock skew) or "Retry-After: 0" would otherwise burn every
+ * attempt at once. Hints are capped so a bogus header can't stall the app
+ * for hours.
  */
 export function retryDelay(
   attempt: number,
@@ -97,11 +99,11 @@ export function retryDelay(
   random: () => number = Math.random,
 ): number {
   const cap = 5 * 60_000;
-  if (info.retryAfterMs !== undefined) return Math.min(cap, info.retryAfterMs);
-  if (info.resetAt !== undefined && info.remaining === 0) {
-    return Math.min(cap, Math.max(0, info.resetAt - now));
-  }
-  return backoffDelay(attempt, opts, random);
+  const floor = backoffDelay(attempt, opts, random);
+  let hinted = 0;
+  if (info.retryAfterMs !== undefined) hinted = info.retryAfterMs;
+  else if (info.resetAt !== undefined && info.remaining === 0) hinted = info.resetAt - now;
+  return Math.min(cap, Math.max(floor, hinted));
 }
 
 /** Abortable sleep. Rejects with the signal's reason when aborted. */

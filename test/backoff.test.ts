@@ -62,6 +62,14 @@ describe('retryDelay', () => {
   it('falls back to exponential backoff', () => {
     expect(retryDelay(3, {}, now, opts)).toBe(8000);
   });
+
+  it('keeps the backoff as a floor when retry-after is zero', () => {
+    expect(retryDelay(2, { retryAfterMs: 0 }, now, opts)).toBe(4000);
+  });
+
+  it('keeps the backoff as a floor when the reset is already past', () => {
+    expect(retryDelay(1, { remaining: 0, resetAt: now - 60_000 }, now, opts)).toBe(2000);
+  });
 });
 
 describe('isRetryableStatus', () => {
