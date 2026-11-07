@@ -1,35 +1,38 @@
 # Changelog
 
 All notable changes to this project are documented here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
-[Semantic Versioning](https://semver.org/).
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### 0.1.0 (unreleased)
+### Changed
 
-#### Added
+- Renamed to sumidos.notx.blue (Portuguese); quiet.notx.blue is the English
+  alias of the same site. One OAuth client per origin.
+- New look in the notx.blue family: violet ink, light, dark and terminal
+  themes, the shared header and footer.
+- Activity is read once per account; "count replies" (on by default),
+  "count reposts" (off) and the 30/90/180/365-day threshold (90 by default)
+  only re-filter.
+- Results stream in during the scan; from 500 follows the page warns that it
+  takes a while and shows the 429 wait.
+- Unfollowing uses `com.atproto.repo.applyWrites` in batches of 200, with no
+  cap on how many, and can be undone while the tab is open.
+- A login session stays in the tab that logged in.
+- License text aligned with the family: GPL-3.0-only with a NOTICE.
+- Node 24.
 
-- Scan the follows of any public Bluesky handle or DID through the public
-  AppView, and find each account's last activity (posts only, posts and
-  replies, or including reposts).
-- Results table sorted by inactivity, with counts, links to bsky.app and badges
-  for mutual / not mutual, never posted, deactivated, taken down, not found and
-  likely ghosts.
-- Filters for minimum inactivity (30/90/180/365 days or custom), non-mutuals,
-  never posted, likely ghosts, keep list, and search; sortable columns.
-- CSV export of the current view.
-- IndexedDB cache per scanned account with incremental rescans; cancelled scans
-  keep their progress.
-- Full scan (also reads follow records from the PDS and pages deeper) and quick
-  scan (one request per account, optional random sample).
-- Bounded concurrency (4 by default), exponential backoff, and rate-limit header
-  handling.
-- Login with atproto OAuth (`@atproto/oauth-client-browser`), with
-  `client-metadata.json` generated at build time and the loopback client for
-  local development.
-- Bulk unfollow for the logged-in owner: confirmation, paced deletes, live log,
-  stop button and summary; dry-run mode; exportable keep list.
-- English and Brazilian Portuguese UI, light and dark themes, keyboard and
-  screen-reader friendly markup, responsive layout.
-- Unit tests and an opt-in contract test against the public API.
+### Fixed
+
+- Unfollow controls only appear on the logged-in account's own list.
+- Without a session, only public AppView data for the typed handle is read;
+  no other account's repo is read.
+- A `Retry-After: 0` or a reset already in the past no longer burns every
+  retry at once: the backoff is the floor.
+
+### Removed
+
+- The "ghost" badge and its heuristics.
+- The scan cache (IndexedDB), saved scans and the keep list: nothing about a
+  lookup is stored.
+- Mutual detection (`getRelationships`).
