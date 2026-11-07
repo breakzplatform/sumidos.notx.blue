@@ -413,6 +413,7 @@ async function startScan(): Promise<void> {
         onSubject: (subject) => {
           state.subject = subject;
           state.owned = Boolean(state.session && state.session.sub === subject.did);
+          renderStatus();
           renderProgress();
         },
         onProgress,
