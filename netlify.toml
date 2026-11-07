@@ -1,0 +1,14 @@
+# Static site: Vite builds into dist/, which Netlify publishes as is.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# The privacy policy is shared by every notx.blue app.
+[[redirects]]
+  from = "/privacy"
+  to = "https://notx.blue/privacy"
+  status = 301
+  force = true

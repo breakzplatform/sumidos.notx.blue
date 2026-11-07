@@ -1,8 +1,8 @@
 {
-  "name": "quiet.notx.blue",
+  "name": "sumidos.notx.blue",
   "version": "0.1.0",
   "private": true,
-  "description": "See which Bluesky accounts you follow have gone quiet, and unfollow them if you want.",
+  "description": "Find out who a Bluesky account follows that stopped posting, and unfollow them from your own list.",
   "license": "GPL-3.0-only",
   "author": "Joselito <eu@joseli.to>",
   "type": "module",
@@ -11,20 +11,24 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:contract": "QUIET_CONTRACT=1 vitest run test/contract"
+    "test:contract": "SUMIDOS_CONTRACT=1 vitest run test/contract"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "dependencies": {
     "@atproto/oauth-client-browser": "^0.5.10"
   },
   "devDependencies": {
-    "@types/node": "^22.20.5",
-    "fake-indexeddb": "^6.2.6",
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1",
     "vite": "^8.3.4",
     "vitest": "^5.0.5"
   }
