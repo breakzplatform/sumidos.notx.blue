@@ -29,3 +29,18 @@ export function normalizeActorInput(input: string): string | null {
   if (isHandle(value)) return value;
   return null;
 }
+
+/**
+ * What the sign-in field accepts: a handle, a DID or a PDS URL, which the
+ * OAuth client resolves. Only the "@" and "at://" people paste are removed.
+ */
+export function normalizeSignInInput(input: string): string {
+  let value = input.trim();
+  let previous = '';
+  while (value !== previous) {
+    previous = value;
+    if (value.toLowerCase().startsWith('at://')) value = value.slice('at://'.length).trim();
+    else if (value.startsWith('@')) value = value.slice(1).trim();
+  }
+  return value;
+}

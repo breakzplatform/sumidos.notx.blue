@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeActorInput } from '../src/lib/identity';
+import { normalizeActorInput, normalizeSignInInput } from '../src/lib/identity';
 
 describe('normalizeActorInput', () => {
   it('accepts handles in different forms', () => {
@@ -17,5 +17,21 @@ describe('normalizeActorInput', () => {
     expect(normalizeActorInput('')).toBeNull();
     expect(normalizeActorInput('not a handle')).toBeNull();
     expect(normalizeActorInput('alice')).toBeNull();
+  });
+});
+
+describe('normalizeSignInInput', () => {
+  it('drops the @ and at:// people paste', () => {
+    expect(normalizeSignInInput('  @alice.example.com ')).toBe('alice.example.com');
+    expect(normalizeSignInInput('at://@alice.example.com')).toBe('alice.example.com');
+  });
+
+  it('keeps a PDS URL or a DID as typed', () => {
+    expect(normalizeSignInInput('https://pds.example.com')).toBe('https://pds.example.com');
+    expect(normalizeSignInInput('did:plc:abc')).toBe('did:plc:abc');
+  });
+
+  it('turns blank input into an empty string', () => {
+    expect(normalizeSignInInput('  @ ')).toBe('');
   });
 });
