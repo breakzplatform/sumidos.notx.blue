@@ -4,7 +4,7 @@ Find out who a Bluesky account follows that stopped posting. Log in to
 unfollow them from your own list, in bulk, with an undo.
 
 - `sumidos.notx.blue` is the site, in Brazilian Portuguese.
-- `quiet.notx.blue` is the same site, opening in English.
+- `crickets.notx.blue` is the same site, in English.
 
 Part of [notx.blue](https://notx.blue).
 

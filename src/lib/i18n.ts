@@ -13,11 +13,6 @@ export const LOCALES: Record<Locale, { messages: Messages }> = {
   'pt-BR': { messages: ptBR },
 };
 
-/** The English alias host opens in English; every other host in Portuguese. */
-export function localeForHost(hostname: string): Locale {
-  return hostname.toLowerCase().startsWith('quiet.') ? 'en' : 'pt-BR';
-}
-
 export function isLocale(value: unknown): value is Locale {
   return value === 'en' || value === 'pt-BR';
 }

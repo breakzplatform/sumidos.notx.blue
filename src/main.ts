@@ -3,13 +3,14 @@ import './styles.css';
 import { DEFAULT_COUNT_RULES } from './lib/activity';
 import { AppViewReader, PdsRepoClient, PUBLIC_APPVIEW, type RepoClient } from './lib/bsky';
 import { rowsToCsv } from './lib/csv';
-import { I18n, isLocale, localeForHost, type Locale } from './lib/i18n';
+import { I18n, isLocale, type Locale } from './lib/i18n';
 import { normalizeActorInput } from './lib/identity';
 import { DEFAULT_MIN_DAYS, isMinDays, visibleRows, type Filters, type Row } from './lib/inactivity';
 import type { OAuthSession } from './lib/oauth';
 import { allowedHosts, oauthTarget, parseHostList } from './lib/oauth-metadata';
 import { ActorError, LARGE_LIST, resumeFeeds, scan, type ScanPhase, type ScanProgress, type ScanSubject } from './lib/scan';
 import { Selection } from './lib/selection';
+import { localeForHost, siteNameFor } from './lib/site';
 import type { Account } from './lib/types';
 import {
   indexFollowRecords,
@@ -34,7 +35,6 @@ const BUG_FORM = { en: 'https://q.joseli.to/forms/notx-blue-bugs', 'pt-BR': 'htt
 
 const storage = safeStorage();
 const host = location.hostname;
-const siteName = host.startsWith('quiet.') ? 'quiet' : 'sumidos';
 const i18n = new I18n(initialLocale());
 const t = i18n.t;
 const oauth = oauthTarget(location, allowedHosts(parseHostList(import.meta.env.VITE_OAUTH_EXTRA_HOSTS)));
@@ -159,17 +159,22 @@ function syncTheme(): void {
   el.theme.setAttribute('aria-label', t('theme.aria', { current: t(THEME_KEYS[current]), next: t(THEME_KEYS[next]) }));
 }
 
+function siteName(): string {
+  return siteNameFor(host, i18n.locale);
+}
+
 function applyStatic(): void {
+  const name = siteName();
   document.documentElement.lang = i18n.locale;
-  document.title = t('appTitle', { host: `${siteName}.notx.blue` });
+  document.title = t('appTitle', { host: `${name}.notx.blue` });
   document.querySelector('meta[name="description"]')?.setAttribute('content', t('description'));
   for (const node of document.querySelectorAll<HTMLElement>('[data-i18n]')) node.textContent = t(node.dataset.i18n!);
   for (const node of document.querySelectorAll<HTMLElement>('[data-i18n-placeholder]')) {
     node.setAttribute('placeholder', t(node.dataset.i18nPlaceholder!));
   }
   for (const option of el.minDays.options) option.textContent = t('rules.days', { count: Number(option.value) });
-  byId('wordmark-name').textContent = siteName;
-  byId('wordmark').setAttribute('aria-label', `${siteName}.notx.blue`);
+  byId('wordmark-name').textContent = name;
+  byId('wordmark').setAttribute('aria-label', `${name}.notx.blue`);
   const other: Locale = i18n.locale === 'en' ? 'pt-BR' : 'en';
   el.language.textContent = other === 'en' ? 'english' : 'português';
   el.language.lang = other;
@@ -709,7 +714,7 @@ el.undo.addEventListener('click', () => void runUndo());
 byId('csv').addEventListener('click', () => {
   const handle = state.subject?.handle ?? 'list';
   const date = new Date().toISOString().slice(0, 10);
-  download(`${siteName}-${handle}-${date}.csv`, rowsToCsv(rows()), 'text/csv;charset=utf-8');
+  download(`${siteName()}-${handle}-${date}.csv`, rowsToCsv(rows()), 'text/csv;charset=utf-8');
 });
 el.signIn.addEventListener('click', () => void signIn());
 el.signOut.addEventListener('click', () => void signOut());

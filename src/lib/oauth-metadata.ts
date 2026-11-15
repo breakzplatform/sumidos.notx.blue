@@ -7,11 +7,7 @@
  * Used at build time to write the documents and at runtime to configure the
  * client, so the two can't drift apart.
  */
-
-export const PRIMARY_HOST = 'sumidos.notx.blue';
-/** English alias of the same site. */
-export const ALIAS_HOST = 'quiet.notx.blue';
-export const SITE_HOSTS: readonly string[] = [PRIMARY_HOST, ALIAS_HOST];
+import { SITE_HOSTS } from './site';
 
 /** The `atproto` base scope plus deleting follows and writing them back (undo). */
 export const OAUTH_SCOPE = 'atproto repo:app.bsky.graph.follow?action=create&action=delete';

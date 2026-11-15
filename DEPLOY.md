@@ -10,12 +10,22 @@ metadata document, and its `client_id` is that document's own URL:
 
 ```
 https://sumidos.notx.blue/oauth/sumidos.notx.blue.json
-https://quiet.notx.blue/oauth/quiet.notx.blue.json
+https://crickets.notx.blue/oauth/crickets.notx.blue.json
 ```
 
 The redirect URI is the host's root (`https://<host>/`). At runtime the page
 picks the document for `location.host`; any host outside the allowlist
-(`src/lib/oauth-metadata.ts`) gets no login button. Loopback addresses
+(`SITE_HOSTS` in `src/lib/site.ts`, plus `VITE_OAUTH_EXTRA_HOSTS`) gets no
+login button.
+
+## Two names
+
+`sumidos.notx.blue` (Portuguese) and `crickets.notx.blue` (English) are the
+same build. The host picks the name in the wordmark and title and the opening
+language (`src/lib/site.ts`); the language button still switches and is
+remembered per browser. Any other host opens in Portuguese and is named after
+the language showing. Both hosts must point at the same deploy (on Netlify:
+one site, `crickets.notx.blue` as a domain alias). Loopback addresses
 (`npm run dev`, `npm run preview`) use the atproto loopback client.
 
 To test login on another host, such as a deploy preview, add it at build

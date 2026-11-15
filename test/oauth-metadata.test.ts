@@ -18,7 +18,7 @@ describe('buildClientMetadata', () => {
     expect(m.client_id).toBe('https://sumidos.notx.blue/oauth/sumidos.notx.blue.json');
     expect(m.redirect_uris).toEqual(['https://sumidos.notx.blue/']);
     expect(m.client_name).toBe('sumidos.notx.blue');
-    expect(buildClientMetadata('quiet.notx.blue').client_id).toBe('https://quiet.notx.blue/oauth/quiet.notx.blue.json');
+    expect(buildClientMetadata('crickets.notx.blue').client_id).toBe('https://crickets.notx.blue/oauth/crickets.notx.blue.json');
   });
 
   it('asks only to create and delete follows', () => {
@@ -34,9 +34,13 @@ describe('buildClientMetadata', () => {
 describe('oauthTarget', () => {
   const hosts = allowedHosts();
 
+  it('has one client per site host and no other', () => {
+    expect(hosts).toEqual(['sumidos.notx.blue', 'crickets.notx.blue']);
+  });
+
   it('allows both site hosts', () => {
     expect(oauthTarget(at('https://sumidos.notx.blue/'), hosts)).toEqual({ kind: 'hosted', host: 'sumidos.notx.blue' });
-    expect(oauthTarget(at('https://quiet.notx.blue/?x=1'), hosts)).toEqual({ kind: 'hosted', host: 'quiet.notx.blue' });
+    expect(oauthTarget(at('https://crickets.notx.blue/?x=1'), hosts)).toEqual({ kind: 'hosted', host: 'crickets.notx.blue' });
   });
 
   it('refuses other hosts, plain http and odd ports', () => {

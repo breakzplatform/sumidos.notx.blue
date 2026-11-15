@@ -1,13 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { I18n, LOCALES, format, localeForHost } from '../src/lib/i18n';
-
-describe('localeForHost', () => {
-  it('opens the English alias in English and everything else in Portuguese', () => {
-    expect(localeForHost('quiet.notx.blue')).toBe('en');
-    expect(localeForHost('sumidos.notx.blue')).toBe('pt-BR');
-    expect(localeForHost('127.0.0.1')).toBe('pt-BR');
-  });
-});
+import { I18n, LOCALES, format } from '../src/lib/i18n';
 
 describe('format', () => {
   const msgs = { hi: 'Hi {name}', days: { one: '{count} day', other: '{count} days' } };

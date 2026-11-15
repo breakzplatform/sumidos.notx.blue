@@ -7,7 +7,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-- Renamed to sumidos.notx.blue (Portuguese); quiet.notx.blue is the English
+- Renamed to sumidos.notx.blue (Portuguese); crickets.notx.blue is the English
   alias of the same site. One OAuth client per origin.
 - New look in the notx.blue family: violet ink, light, dark and terminal
   themes, the shared header and footer.
