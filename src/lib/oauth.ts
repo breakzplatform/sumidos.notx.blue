@@ -30,7 +30,7 @@ function createClient(target: Exclude<OAuthTarget, { kind: 'none' }>): Promise<B
   }
   return Promise.resolve(
     new BrowserOAuthClient({
-      clientMetadata: buildClientMetadata(target.host),
+      clientMetadata: buildClientMetadata(target.host, target.base),
       handleResolver: PUBLIC_APPVIEW,
       responseMode: 'fragment',
     }),

@@ -41,13 +41,24 @@ export interface ClientMetadata {
   dpop_bound_access_tokens: true;
 }
 
-export function buildClientMetadata(host: string, scope: string = OAUTH_SCOPE): ClientMetadata {
-  const origin = `https://${host}`;
+/** "/", "/sumidos/" and "sumidos" all become a path with both slashes. */
+export function normalizeBase(base: string): string {
+  const trimmed = base.replace(/^\/+|\/+$/g, '');
+  return trimmed ? `/${trimmed}/` : '/';
+}
+
+/**
+ * The app's root is the redirect URI and the metadata document sits under
+ * it, so a build for a subpath (`vite build --base=/sumidos/`) gets both
+ * under that subpath.
+ */
+export function buildClientMetadata(host: string, base = '/', scope: string = OAUTH_SCOPE): ClientMetadata {
+  const root = `https://${host}${normalizeBase(base)}`;
   return {
-    client_id: `${origin}/${metadataPath(host)}`,
+    client_id: `${root}${metadataPath(host)}`,
     client_name: host,
-    client_uri: `${origin}/`,
-    redirect_uris: [`${origin}/`],
+    client_uri: root,
+    redirect_uris: [root],
     scope,
     grant_types: ['authorization_code', 'refresh_token'],
     response_types: ['code'],
@@ -66,17 +77,25 @@ export function loopbackClientId(redirectUri: string, scope: string = OAUTH_SCOP
   return `http://localhost?redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`;
 }
 
-export type OAuthTarget = { kind: 'hosted'; host: string } | { kind: 'loopback'; redirectUri: string } | { kind: 'none' };
+export type OAuthTarget =
+  | { kind: 'hosted'; host: string; base: string }
+  | { kind: 'loopback'; redirectUri: string }
+  | { kind: 'none' };
 
 /**
  * Which OAuth client this page may use. Only https pages on an allowed host
  * (exact match, default port) and loopback pages get one.
  */
-export function oauthTarget(location: Pick<Location, 'protocol' | 'host' | 'hostname' | 'origin'>, allowed: readonly string[]): OAuthTarget {
+export function oauthTarget(
+  location: Pick<Location, 'protocol' | 'host' | 'hostname' | 'origin'>,
+  allowed: readonly string[],
+  base = '/',
+): OAuthTarget {
+  const root = normalizeBase(base);
   if (isLoopbackHost(location.hostname)) {
-    return { kind: 'loopback', redirectUri: `${location.origin.replace('//localhost', '//127.0.0.1')}/` };
+    return { kind: 'loopback', redirectUri: `${location.origin.replace('//localhost', '//127.0.0.1')}${root}` };
   }
   const host = location.host.toLowerCase();
-  if (location.protocol === 'https:' && allowed.includes(host)) return { kind: 'hosted', host };
+  if (location.protocol === 'https:' && allowed.includes(host)) return { kind: 'hosted', host, base: root };
   return { kind: 'none' };
 }

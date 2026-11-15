@@ -37,7 +37,7 @@ const storage = safeStorage();
 const host = location.hostname;
 const i18n = new I18n(initialLocale());
 const t = i18n.t;
-const oauth = oauthTarget(location, allowedHosts(parseHostList(import.meta.env.VITE_OAUTH_EXTRA_HOSTS)));
+const oauth = oauthTarget(location, allowedHosts(parseHostList(import.meta.env.VITE_OAUTH_EXTRA_HOSTS)), import.meta.env.BASE_URL);
 
 const appview = new XrpcClient(serviceFetchHandler(PUBLIC_APPVIEW), {
   onRetry: (e) => {
@@ -173,6 +173,7 @@ function applyStatic(): void {
     node.setAttribute('placeholder', t(node.dataset.i18nPlaceholder!));
   }
   for (const option of el.minDays.options) option.textContent = t('rules.days', { count: Number(option.value) });
+  byId<HTMLAnchorElement>('wordmark').href = import.meta.env.BASE_URL;
   byId('wordmark-name').textContent = name;
   byId('wordmark').setAttribute('aria-label', `${name}.notx.blue`);
   const other: Locale = i18n.locale === 'en' ? 'pt-BR' : 'en';

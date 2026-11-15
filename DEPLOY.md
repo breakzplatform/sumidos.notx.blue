@@ -35,6 +35,23 @@ time:
 VITE_OAUTH_EXTRA_HOSTS=preview--example.netlify.app npm run build
 ```
 
+## Subpath builds
+
+The app also runs under a subpath, e.g. a staging server at
+`https://staging.joselito.dev/sumidos/`. Vite's `--base` sets the asset URLs,
+the home link, the OAuth redirect URI and where the metadata documents live:
+
+```sh
+VITE_OAUTH_EXTRA_HOSTS=staging.joselito.dev npm run build -- --base=/sumidos/
+```
+
+That writes `dist/oauth/staging.joselito.dev.json` with
+`client_id: https://staging.joselito.dev/sumidos/oauth/staging.joselito.dev.json`
+and `redirect_uris: ["https://staging.joselito.dev/sumidos/"]`; copy `dist/`
+to the server's `/sumidos/` and serve the JSON as `application/json`. Drop
+`VITE_OAUTH_EXTRA_HOSTS` for a staging copy without login. The session lives
+in the origin's storage, which other apps on the same staging host share.
+
 Renaming a host invalidates its sessions, so the hosts above are the ones to
 keep.
 
