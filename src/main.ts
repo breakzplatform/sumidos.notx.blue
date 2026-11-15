@@ -3,6 +3,7 @@ import './styles.css';
 import { DEFAULT_COUNT_RULES } from './lib/activity';
 import { AppViewReader, PdsRepoClient, PUBLIC_APPVIEW, type RepoClient } from './lib/bsky';
 import { rowsToCsv } from './lib/csv';
+import { headText } from './lib/head';
 import { I18n, isLocale, type Locale } from './lib/i18n';
 import { normalizeActorInput } from './lib/identity';
 import { DEFAULT_MIN_DAYS, isMinDays, visibleRows, type Filters, type Row } from './lib/inactivity';
@@ -165,9 +166,19 @@ function siteName(): string {
 
 function applyStatic(): void {
   const name = siteName();
+  const head = headText(host, i18n.locale);
   document.documentElement.lang = i18n.locale;
-  document.title = t('appTitle', { host: `${name}.notx.blue` });
-  document.querySelector('meta[name="description"]')?.setAttribute('content', t('description'));
+  document.title = head.title;
+  const metas: [string, string][] = [
+    ['meta[name="description"]', head.description],
+    ['meta[property="og:title"]', head.title],
+    ['meta[property="og:description"]', head.description],
+    ['meta[property="og:site_name"]', head.siteName],
+    ['meta[property="og:locale"]', head.ogLocale],
+    ['meta[name="twitter:title"]', head.title],
+    ['meta[name="twitter:description"]', head.description],
+  ];
+  for (const [selector, content] of metas) document.querySelector(selector)?.setAttribute('content', content);
   for (const node of document.querySelectorAll<HTMLElement>('[data-i18n]')) node.textContent = t(node.dataset.i18n!);
   for (const node of document.querySelectorAll<HTMLElement>('[data-i18n-placeholder]')) {
     node.setAttribute('placeholder', t(node.dataset.i18nPlaceholder!));

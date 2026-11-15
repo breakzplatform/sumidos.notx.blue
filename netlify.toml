@@ -12,3 +12,11 @@
   to = "https://notx.blue/privacy"
   status = 301
   force = true
+
+# crickets.notx.blue is a domain alias of this site. Its root gets the copy
+# of the page with English <head> tags, so link previews are in English.
+[[redirects]]
+  from = "https://crickets.notx.blue/"
+  to = "/index.en.html"
+  status = 200
+  force = true

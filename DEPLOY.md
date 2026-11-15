@@ -25,7 +25,17 @@ same build. The host picks the name in the wordmark and title and the opening
 language (`src/lib/site.ts`); the language button still switches and is
 remembered per browser. Any other host opens in Portuguese and is named after
 the language showing. Both hosts must point at the same deploy (on Netlify:
-one site, `crickets.notx.blue` as a domain alias). Loopback addresses
+one site, `crickets.notx.blue` as a domain alias).
+
+Link previews don't run the app, so the build writes the `<head>` (title,
+description, canonical, Open Graph and Twitter tags) per host:
+`dist/index.html` for `sumidos.notx.blue` and `dist/index.en.html` for
+`crickets.notx.blue`. `netlify.toml` rewrites `https://crickets.notx.blue/`
+to `/index.en.html`; another host needs the same rewrite. Check it with:
+
+```sh
+curl -s https://crickets.notx.blue/ | grep og:site_name
+``` Loopback addresses
 (`npm run dev`, `npm run preview`) use the atproto loopback client.
 
 To test login on another host, such as a deploy preview, add it at build
