@@ -49,7 +49,7 @@ interface Hooks {
     progress: ScanProgress | null;
     status: { key: string; params?: Record<string, string | number> };
     session: OAuthSession | null;
-    sessionHandle: string;
+    sessionProfile: { handle: string; displayName?: string; avatar?: string } | null;
     selection: { markAll(dids: Iterable<string>): void };
   };
   renderAll(): void;
@@ -79,7 +79,7 @@ export function install(hooks: Hooks): void {
 
   if (owner) {
     state.session = { sub: subject.did, fetchHandler: () => Promise.reject(new Error('fixture')) } as unknown as OAuthSession;
-    state.sessionHandle = subject.handle;
+    state.sessionProfile = { handle: subject.handle, displayName: 'Você' };
     state.owned = true;
   }
 

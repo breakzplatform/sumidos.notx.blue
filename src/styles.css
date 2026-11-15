@@ -180,11 +180,6 @@ section.cast {
 .panel-body {
   padding: var(--box-pad);
 }
-.panel-foot {
-  padding: var(--space-5) var(--box-pad);
-  border-top: var(--border);
-  background: var(--surface-sunken);
-}
 
 .privacy-line {
   margin: 0 0 var(--space-8);
@@ -199,7 +194,7 @@ section.cast {
   color: var(--text-2);
 }
 .status-line {
-  margin: calc(var(--space-6) * -1) 0 var(--space-10);
+  margin: 0;
   font: var(--type-meta);
   letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
@@ -332,23 +327,104 @@ section.cast {
   accent-color: var(--project-ink);
 }
 
-.auth-row {
+/* Sign-in panel and profile row, as in links.notx.blue (landing.css and the
+   profile block). */
+.signin-body {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+.signin-body p {
+  margin: 0;
+}
+.signin-atmosphere {
+  font: var(--type-dek);
+  color: var(--text-1);
+}
+.signin-choices {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: minmax(0, 1fr);
+}
+.signin-choices .db-btn,
+.signin-form .db-btn {
+  min-height: 56px;
+}
+.signin-choices .db-btn {
+  width: 100%;
+  font-size: var(--text-body);
+}
+.signin-form {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  font-weight: var(--weight-bold);
+}
+.signin-form .db-note {
+  font-weight: normal;
+}
+.signin-input-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4) var(--space-6);
+  gap: var(--space-4);
 }
-.auth-row p {
-  margin: 0;
-  flex: 1 1 18rem;
-  color: var(--text-2);
-  font: var(--type-dek);
+.signin-input-row .db-field {
+  flex: 1;
+  min-width: 140px;
+}
+.signin-input-row .db-input {
+  height: 56px;
+}
+.signin-status:empty {
+  display: none;
+}
+@media (min-width: 640px) {
+  .signin-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .auth-error {
-  margin: var(--space-4) 0 0;
+  margin: 0;
   font: var(--type-code);
-  color: var(--text-2);
+  color: var(--status-error);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: var(--border);
+}
+.profile > div {
+  flex: 1;
+  min-width: 0;
+}
+.profile p {
+  margin: 0;
+}
+.profile .name {
+  font: var(--type-feed-title);
+  letter-spacing: var(--tracking-display);
+  overflow-wrap: anywhere;
+}
+.profile .handle {
+  font: inherit;
+  color: var(--text-3);
+  overflow-wrap: anywhere;
+}
+.profile .avatar {
+  flex: none;
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border: var(--border);
+  background: var(--surface-card);
+}
+.profile .avatar.placeholder {
+  background-image: radial-gradient(circle at 3px 3px, var(--halftone-dot) 1px, transparent 1.5px);
+  background-size: 6px 6px;
 }
 
 @media (pointer: coarse) {

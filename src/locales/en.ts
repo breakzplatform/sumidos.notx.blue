@@ -12,7 +12,7 @@ export const en: Messages = {
 
   'privacy.public': 'The lookup runs in your browser. Nothing is stored or sent to our servers.',
   'privacy.session':
-    'The lookup runs in your browser. Nothing is stored or sent to our servers. When logged in, the session stays in this tab only.',
+    'The lookup runs in your browser. Nothing is stored or sent to our servers. When signed in, the session stays in this tab only.',
 
   'search.title': 'Who stopped posting',
   'search.lede': 'Find out who a Bluesky handle follows that stopped posting.',
@@ -29,14 +29,21 @@ export const en: Messages = {
   'rules.replies': 'Count replies',
   'rules.reposts': 'Count reposts',
 
-  'auth.pitch': 'To unfollow accounts on your own list, log in with Bluesky. The permission only covers following and unfollowing.',
-  'auth.signIn': 'Log in with Bluesky',
-  'auth.signOut': 'Log out',
-  'auth.who': 'Logged in as @{handle}.',
-  'auth.needHandle': 'Type your handle in the field above, then Log in.',
-  'auth.unavailable': 'Login does not work on this address.',
-  'auth.redirecting': 'Opening your Bluesky server…',
-  'auth.failed': 'Could not log in: {message}',
+  'auth.title': 'Sign in',
+  'auth.pitch': 'To unfollow accounts on your own list, sign in. The permission only covers following and unfollowing.',
+  'auth.atmosphere': 'Works with Bluesky and any AT Protocol (Atmosphere) server.',
+  'auth.signIn': 'Sign in with Bluesky',
+  'auth.signInOther': 'Sign in with another Atmosphere account',
+  'auth.handleLabel': 'Your handle or server',
+  'auth.handleHint': 'you.example.com or https://pds.example.com',
+  'auth.continue': 'Continue',
+  'auth.explain':
+    'We look up the server (PDS) behind your handle and send you there to sign in. Your password never touches this site.',
+  'auth.needHandle': 'Enter your handle.',
+  'auth.signOut': 'Sign out',
+  'auth.unavailable': 'Sign-in does not work on this address.',
+  'auth.redirecting': 'Opening your server…',
+  'auth.failed': 'Could not sign in: {message}',
 
   'status.idle': 'Type a handle and press Check.',
   'status.resolving': 'Looking up @{handle}…',
@@ -127,7 +134,7 @@ export const en: Messages = {
   'undo.done': { one: 'Done: {count} account followed again.', other: 'Done: {count} accounts followed again.' },
 
   'note.deactivated':
-    'A deactivated account drops out of the public list of who someone follows. It only shows up when you log in and look at your own list.',
+    'A deactivated account drops out of the public list of who someone follows. It only shows up when you sign in and look at your own list.',
 
   'footer.status': 'Work in progress. Expect bugs',
   'footer.bug': 'found one?',

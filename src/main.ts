@@ -5,7 +5,7 @@ import { AppViewReader, PdsRepoClient, PUBLIC_APPVIEW, type RepoClient } from '.
 import { rowsToCsv } from './lib/csv';
 import { headText } from './lib/head';
 import { I18n, isLocale, type Locale } from './lib/i18n';
-import { normalizeActorInput } from './lib/identity';
+import { normalizeActorInput, normalizeSignInInput } from './lib/identity';
 import { DEFAULT_MIN_DAYS, isMinDays, visibleRows, type Filters, type Row } from './lib/inactivity';
 import type { OAuthSession } from './lib/oauth';
 import { allowedHosts, oauthTarget, parseHostList } from './lib/oauth-metadata';
@@ -55,6 +55,8 @@ function initialLocale(): Locale {
 // ---------------------------------------------------------------------------
 // State
 
+type SessionProfile = { handle: string; displayName?: string; avatar?: string };
+
 type StatusKey = { key: string; params?: Record<string, string | number> };
 
 const state = {
@@ -69,7 +71,7 @@ const state = {
   progress: null as ScanProgress | null,
   status: { key: 'status.idle' } as StatusKey,
   session: null as OAuthSession | null,
-  sessionHandle: '',
+  sessionProfile: null as SessionProfile | null,
   shown: PAGE,
   selection: new Selection(),
   undo: new Map<string, StoredFollow[]>(),
@@ -112,11 +114,18 @@ const el = {
   undoProgress: byId<HTMLProgressElement>('undo-bar-progress'),
   undo: byId<HTMLButtonElement>('undo'),
   accountBox: byId('account-box'),
-  authOut: byId('auth-out'),
   authIn: byId('auth-in'),
-  authWho: byId('auth-who'),
+  authAvatar: byId<HTMLImageElement>('auth-avatar'),
+  authAvatarPlaceholder: byId('auth-avatar-placeholder'),
+  authName: byId('auth-name'),
+  authHandle: byId('auth-handle'),
   authError: byId('auth-error'),
-  signIn: byId<HTMLButtonElement>('sign-in'),
+  signInStatus: byId('signin-status'),
+  bskySignIn: byId<HTMLButtonElement>('bsky-sign-in'),
+  otherSignIn: byId<HTMLButtonElement>('other-sign-in'),
+  handleForm: byId<HTMLFormElement>('handle-form'),
+  handle: byId<HTMLInputElement>('handle'),
+  handleError: byId('handle-error'),
   signOut: byId<HTMLButtonElement>('sign-out'),
   privacy: byId('privacy-line'),
   language: byId<HTMLButtonElement>('language'),
@@ -233,12 +242,24 @@ function canContinue(): boolean {
   return state.stopped || state.accounts.some((a) => a.status === 'error');
 }
 
+/** Avatars come from the AppView's CDN, the only image host the CSP allows. */
+const AVATAR_CDN = 'https://cdn.bsky.app/';
+
 function renderAuth(): void {
-  el.privacy.textContent = t(state.session ? 'privacy.session' : 'privacy.public');
-  el.accountBox.hidden = oauth.kind === 'none';
-  el.authOut.hidden = Boolean(state.session);
-  el.authIn.hidden = !state.session;
-  if (state.session) el.authWho.textContent = t('auth.who', { handle: state.sessionHandle || state.session.sub });
+  const session = state.session;
+  el.privacy.textContent = t(session ? 'privacy.session' : 'privacy.public');
+  el.accountBox.hidden = oauth.kind === 'none' || Boolean(session);
+  el.authIn.hidden = !session;
+  if (!session) return;
+  const profile = state.sessionProfile;
+  el.authName.textContent = profile?.displayName || profile?.handle || session.sub;
+  el.authHandle.textContent = profile?.handle ? `@${profile.handle}` : '';
+  el.authHandle.hidden = !profile?.handle;
+  const avatar = profile?.avatar?.startsWith(AVATAR_CDN) ? profile.avatar : '';
+  if (avatar && el.authAvatar.getAttribute('src') !== avatar) el.authAvatar.src = avatar;
+  el.authAvatar.hidden = !avatar;
+  el.authAvatarPlaceholder.hidden = Boolean(avatar);
+  el.signOut.disabled = state.busyWriting;
 }
 
 function setAuthError(key: string | null, params?: Record<string, string>): void {
@@ -629,31 +650,55 @@ async function loadSession(): Promise<void> {
 async function onSession(session: OAuthSession): Promise<void> {
   state.session = session;
   try {
-    state.sessionHandle = (await reader.getProfile(session.sub)).handle;
+    const { handle, displayName, avatar } = await reader.getProfile(session.sub);
+    state.sessionProfile = { handle, displayName, avatar };
   } catch {
-    state.sessionHandle = '';
+    state.sessionProfile = null;
   }
-  if (!el.actor.value) el.actor.value = state.sessionHandle || session.sub;
+  if (!el.actor.value) el.actor.value = state.sessionProfile?.handle || session.sub;
   renderAll();
 }
 
-async function signIn(): Promise<void> {
-  if (oauth.kind === 'none') return setAuthError('auth.unavailable');
-  const handle = normalizeActorInput(el.actor.value);
-  if (!handle) {
-    setAuthError('auth.needHandle');
-    el.actor.focus();
-    return;
+/** bsky.social is an entryway: the OAuth client finds the account's PDS from it. */
+const BLUESKY_ENTRYWAY = 'https://bsky.social';
+
+function setSignInBusy(busy: boolean): void {
+  for (const control of el.accountBox.querySelectorAll<HTMLButtonElement | HTMLInputElement>('button, input')) {
+    control.disabled = busy;
   }
-  setAuthError('auth.redirecting');
-  el.signIn.disabled = true;
+  el.signInStatus.textContent = busy ? t('auth.redirecting') : '';
+}
+
+async function signIn(input: string): Promise<void> {
+  if (oauth.kind === 'none') return setAuthError('auth.unavailable');
+  setAuthError(null);
+  setSignInBusy(true);
   try {
     const { signIn: redirect } = await import('./lib/oauth');
-    await redirect(oauth, handle);
+    await redirect(oauth, input);
   } catch (err) {
-    el.signIn.disabled = false;
+    setSignInBusy(false);
     setAuthError('auth.failed', { message: err instanceof Error ? err.message : String(err) });
   }
+}
+
+function setHandleError(key: string | null): void {
+  el.handleError.hidden = !key;
+  el.handleError.textContent = key ? t(key) : '';
+  if (key) el.handle.setAttribute('aria-invalid', 'true');
+  else el.handle.removeAttribute('aria-invalid');
+  el.handle.setAttribute('aria-describedby', key ? 'handle-note handle-error' : 'handle-note');
+}
+
+function submitHandle(): void {
+  const input = normalizeSignInInput(el.handle.value);
+  if (!input) {
+    setHandleError('auth.needHandle');
+    el.handle.focus();
+    return;
+  }
+  setHandleError(null);
+  void signIn(input);
 }
 
 async function signOut(): Promise<void> {
@@ -661,7 +706,7 @@ async function signOut(): Promise<void> {
   if (!session || oauth.kind === 'none') return;
   const { signOut: end } = await import('./lib/oauth');
   await end(oauth, session).catch(() => {});
-  Object.assign(state, { session: null, sessionHandle: '', owned: false, undoNote: null });
+  Object.assign(state, { session: null, sessionProfile: null, owned: false, undoNote: null });
   state.undo.clear();
   state.undoAccounts.clear();
   state.selection.clear();
@@ -676,10 +721,7 @@ byId<HTMLFormElement>('search-form').addEventListener('submit', (e) => {
   void startScan();
 });
 el.stop.addEventListener('click', () => state.abort?.abort());
-el.actor.addEventListener('input', () => {
-  setAuthError(null);
-  renderStatus();
-});
+el.actor.addEventListener('input', () => renderStatus());
 for (const control of [el.minDays, el.replies, el.reposts]) {
   control.addEventListener('change', () => {
     state.shown = PAGE;
@@ -730,7 +772,21 @@ byId('csv').addEventListener('click', () => {
   const date = new Date().toISOString().slice(0, 10);
   download(`${siteName()}-${handle}-${date}.csv`, rowsToCsv(rows()), 'text/csv;charset=utf-8');
 });
-el.signIn.addEventListener('click', () => void signIn());
+el.bskySignIn.addEventListener('click', () => void signIn(BLUESKY_ENTRYWAY));
+el.otherSignIn.addEventListener('click', () => {
+  el.handleForm.hidden = !el.handleForm.hidden;
+  el.otherSignIn.setAttribute('aria-expanded', String(!el.handleForm.hidden));
+  if (!el.handleForm.hidden) el.handle.focus();
+});
+el.handleForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  submitHandle();
+});
+// Back from the sign-in page through the back-forward cache: the page is
+// frozen mid-redirect, so give the buttons back.
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) setSignInBusy(false);
+});
 el.signOut.addEventListener('click', () => void signOut());
 el.language.addEventListener('click', () => {
   const next: Locale = i18n.locale === 'en' ? 'pt-BR' : 'en';

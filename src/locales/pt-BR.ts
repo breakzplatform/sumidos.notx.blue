@@ -29,14 +29,21 @@ export const ptBR: Messages = {
   'rules.replies': 'Contar respostas',
   'rules.reposts': 'Contar reposts',
 
+  'auth.title': 'Entrar',
   'auth.pitch':
-    'Para deixar de seguir contas da sua própria lista, entre com o Bluesky. A permissão cobre só seguir e deixar de seguir.',
+    'Para deixar de seguir contas da sua própria lista, entre com a sua conta. A permissão cobre só seguir e deixar de seguir.',
+  'auth.atmosphere': 'Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).',
   'auth.signIn': 'Entrar com o Bluesky',
+  'auth.signInOther': 'Entrar com outra conta da Atmosphere',
+  'auth.handleLabel': 'Seu handle ou servidor',
+  'auth.handleHint': 'voce.exemplo.com ou https://pds.exemplo.com',
+  'auth.continue': 'Continuar',
+  'auth.explain':
+    'Buscamos o servidor (PDS) do seu handle e levamos você até ele para entrar. Sua senha nunca passa por este site.',
+  'auth.needHandle': 'Informe o handle.',
   'auth.signOut': 'Sair',
-  'auth.who': 'Conectado como @{handle}.',
-  'auth.needHandle': 'Digite o seu @ no campo acima e clique em Entrar.',
   'auth.unavailable': 'O login não funciona neste endereço.',
-  'auth.redirecting': 'Abrindo o seu servidor do Bluesky…',
+  'auth.redirecting': 'Abrindo o seu servidor…',
   'auth.failed': 'Não deu para entrar: {message}',
 
   'status.idle': 'Digite um @ e clique em Verificar.',
