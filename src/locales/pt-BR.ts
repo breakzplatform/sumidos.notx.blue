@@ -137,6 +137,7 @@ export const ptBR: Messages = {
   'footer.bug': 'achou um?',
   'footer.partOf': 'parte do',
   'footer.by': 'por',
+  'footer.source': 'ver código',
   'footer.privacy': 'Privacidade',
   'footer.fromBrazil':
     'Direto do Brasil pelo Joselito, com muito carinho. Este site não usa cookies nem analytics. Idioma e tema ficam neste navegador. Não tem relação com o Bluesky.',

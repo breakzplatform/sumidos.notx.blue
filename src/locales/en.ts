@@ -133,6 +133,7 @@ export const en: Messages = {
   'footer.bug': 'found one?',
   'footer.partOf': 'part of',
   'footer.by': 'by',
+  'footer.source': 'view-source',
   'footer.privacy': 'Privacy',
   'footer.fromBrazil':
     'Directly from Brazil by Joselito, with much love and care. This site uses no cookies and no analytics. Language and theme stay in this browser. It is not related to Bluesky.',
