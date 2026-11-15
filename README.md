@@ -48,6 +48,9 @@ theme. With login, the session belongs to the tab that logged in: other tabs
 don't use it, logging out revokes it, and a session left behind by a closed
 tab is revoked on the next visit.
 
+The full policy, shared by every notx.blue app, is at
+<https://notx.blue/privacy>.
+
 ## Development
 
 Node 24.
