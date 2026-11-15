@@ -12,6 +12,9 @@ import { SITE_HOSTS } from './site';
 /** The `atproto` base scope plus deleting follows and writing them back (undo). */
 export const OAUTH_SCOPE = 'atproto repo:app.bsky.graph.follow?action=create&action=delete';
 
+/** Every notx.blue app shares one privacy policy. */
+export const POLICY_URI = 'https://notx.blue/privacy';
+
 /** Parses a comma-separated host list, e.g. from VITE_OAUTH_EXTRA_HOSTS. */
 export function parseHostList(value: string | undefined): string[] {
   return (value ?? '')
@@ -32,6 +35,7 @@ export interface ClientMetadata {
   client_id: string;
   client_name: string;
   client_uri: string;
+  policy_uri: string;
   redirect_uris: [string, ...string[]];
   scope: string;
   grant_types: ['authorization_code', 'refresh_token'];
@@ -58,6 +62,7 @@ export function buildClientMetadata(host: string, base = '/', scope: string = OA
     client_id: `${root}${metadataPath(host)}`,
     client_name: host,
     client_uri: root,
+    policy_uri: POLICY_URI,
     redirect_uris: [root],
     scope,
     grant_types: ['authorization_code', 'refresh_token'],

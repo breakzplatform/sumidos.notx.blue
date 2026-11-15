@@ -29,6 +29,12 @@ describe('buildClientMetadata', () => {
     expect(m.client_uri).toBe('https://staging.joselito.dev/sumidos/');
   });
 
+  it('points every host at the shared privacy policy', () => {
+    for (const host of ['sumidos.notx.blue', 'crickets.notx.blue']) {
+      expect(buildClientMetadata(host).policy_uri).toBe('https://notx.blue/privacy');
+    }
+  });
+
   it('asks only to create and delete follows', () => {
     expect(OAUTH_SCOPE).toBe('atproto repo:app.bsky.graph.follow?action=create&action=delete');
     expect(buildClientMetadata('sumidos.notx.blue')).toMatchObject({
