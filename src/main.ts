@@ -121,6 +121,7 @@ const el = {
   privacy: byId('privacy-line'),
   language: byId<HTMLButtonElement>('language'),
   theme: byId<HTMLButtonElement>('theme'),
+  themeLabel: byId('theme-label'),
   dialog: byId<HTMLDialogElement>('confirm'),
   confirmTitle: byId('confirm-title'),
   confirmText: byId('confirm-text'),
@@ -156,7 +157,8 @@ const THEME_KEYS: Record<Theme, string> = { light: 'theme.light', dark: 'theme.d
 function syncTheme(): void {
   const current = getTheme();
   const next = nextTheme(current);
-  el.theme.textContent = t(THEME_KEYS[next]);
+  el.theme.dataset.nextTheme = next;
+  el.themeLabel.textContent = t(THEME_KEYS[next]);
   el.theme.setAttribute('aria-label', t('theme.aria', { current: t(THEME_KEYS[current]), next: t(THEME_KEYS[next]) }));
 }
 
