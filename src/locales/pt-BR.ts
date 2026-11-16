@@ -34,7 +34,7 @@ export const ptBR: Messages = {
     'Entre com a sua conta para deixar de seguir quem sumiu da skyline, ou continue sem login para consultar qualquer conta pública.',
   'auth.atmosphere': 'Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).',
   'auth.signIn': 'Entrar com o Bluesky',
-  'auth.signInOther': 'Entrar com o AT Proto',
+  'auth.signInOther': 'Entrar com o ATProto',
   'auth.handleLabel': 'Sua conta ou servidor',
   'auth.handleHint': 'voce.exemplo.com ou https://pds.exemplo.com',
   'auth.continue': 'Continuar',
@@ -70,7 +70,7 @@ export const ptBR: Messages = {
   'progress.large': {
     one: 'São {count} conta. Uma consulta por conta.',
     other:
-      'São {count} contas. Uma consulta por conta: pode levar vários minutos. Os resultados aparecem enquanto chegam, e Parar guarda o que já veio.',
+      'São {count} contas. Uma consulta por conta: pode levar vários minutos.',
   },
   'progress.wait': 'O Bluesky pediu para ir mais devagar. Todas as consultas esperam juntas. Retomando em {seconds}s.',
 
@@ -81,7 +81,6 @@ export const ptBR: Messages = {
     one: '{shown} de {count} conta no filtro',
     other: '{shown} de {count} contas no filtro',
   },
-  'results.metaPublic': 'Lista pública de seguidos de @{handle}. Não dá para saber se essa conta é sua.',
   'results.search': 'Nome ou arroba',
   'results.csv': 'Exportar CSV',
   'results.empty': 'Nenhuma conta corresponde ao filtro.',

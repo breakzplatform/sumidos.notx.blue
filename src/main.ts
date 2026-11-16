@@ -385,7 +385,6 @@ function renderResults(): void {
   const failed = state.accounts.filter((a) => a.status === 'error').length;
   el.resultsMeta.textContent = t('results.meta', { shown: all.length, count: total });
   const notes: string[] = [];
-  if (!owner) notes.push(t('results.metaPublic', { handle: subject.handle }));
   if (failed > 0 && !state.abort) notes.push(t('results.failed', { count: failed }));
   el.resultsNote.textContent = notes.join(' ');
   el.resultsNote.hidden = notes.length === 0;

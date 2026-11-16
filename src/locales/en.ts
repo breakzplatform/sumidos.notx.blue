@@ -34,7 +34,7 @@ export const en: Messages = {
     'Sign in to unfollow the accounts that went quiet on your skyline, or continue without signing in to check any public account.',
   'auth.atmosphere': 'Works with Bluesky and any AT Protocol (Atmosphere) server.',
   'auth.signIn': 'Sign in with Bluesky',
-  'auth.signInOther': 'Sign in with AT Proto',
+  'auth.signInOther': 'Sign in with ATProto',
   'auth.handleLabel': 'Your handle or server',
   'auth.handleHint': 'you.example.com or https://pds.example.com',
   'auth.continue': 'Continue',
@@ -70,7 +70,7 @@ export const en: Messages = {
   'progress.large': {
     one: '{count} account. One request per account.',
     other:
-      '{count} accounts. One request per account: this can take several minutes. Results show up as they arrive, and Stop keeps what came in.',
+      '{count} accounts. One request per account: this can take several minutes.',
   },
   'progress.wait': 'Bluesky asked us to slow down. All requests wait together. Resuming in {seconds}s.',
 
@@ -81,7 +81,6 @@ export const en: Messages = {
     one: '{shown} of {count} account matches the filter',
     other: '{shown} of {count} accounts match the filter',
   },
-  'results.metaPublic': 'Public list of who @{handle} follows. There is no way to tell whether this handle is yours.',
   'results.search': 'Name or handle',
   'results.csv': 'Export CSV',
   'results.empty': 'No account matches the filter.',

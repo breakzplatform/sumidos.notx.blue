@@ -381,12 +381,17 @@ main:focus {
 .anon-box {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4) var(--space-6);
+  gap: var(--space-6) var(--space-8);
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-4) var(--space-6);
+  /* Extra room right and below for the button's cast shadow. */
+  padding: var(--space-6) var(--space-8) var(--space-7) var(--space-6);
   border: var(--border);
   background: var(--surface-sunken);
+}
+.anon-box .db-btn {
+  min-height: var(--target);
+  min-width: 120px;
 }
 .anon-box p {
   margin: 0;
