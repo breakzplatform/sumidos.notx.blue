@@ -3,6 +3,7 @@ import type { Messages } from '../lib/i18n';
 export const ptBR: Messages = {
   appTitle: 'Contas que você segue e pararam de postar • {host}',
   description: 'Descubra quem uma conta do Bluesky segue e parou de postar. Roda no seu navegador.',
+  ogImageAlt: '{host}: quem você segue e parou de postar',
   skip: 'Ir para o conteúdo',
 
   'theme.light': 'claro',

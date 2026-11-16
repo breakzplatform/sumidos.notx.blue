@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!-- Source for public/og-<host>.png. Render at 1200x630 with scripts/build-social.sh;
+     ?host=sumidos.notx.blue (Portuguese) or ?host=crickets.notx.blue (English). -->
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="../src/ds/fonts.css" />
+  <link rel="stylesheet" href="../src/ds/colors.css" />
+  <link rel="stylesheet" href="../src/ds/typography.css" />
+  <link rel="stylesheet" href="../src/ds/spacing.css" />
+  <link rel="stylesheet" href="../src/ds/borders.css" />
+  <link rel="stylesheet" href="../src/ds/halftone.css" />
+  <link rel="stylesheet" href="../src/ds/neo.css" />
+  <style>
+    /* Same card as links.notx.blue/scripts/og.html: newsprint paper, CMU Serif 700
+       wordmark with the name on the project ink block tilted, and the tagline on a
+       halftone shadow, with the dot geometry scaled up for a 1200px card. */
+    :root { --project-ink: var(--ink-violet); --project-ink-contrast: var(--on-violet); }
+    html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: var(--surface-page); }
+    .frame {
+      box-sizing: border-box; width: 1200px; height: 630px; padding: 56px;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 52px;
+    }
+    .wordmark {
+      margin: 0;
+      font: var(--weight-display) 136px/1.1 var(--font-display);
+      letter-spacing: var(--tracking-display);
+      color: var(--text-1);
+      white-space: nowrap;
+    }
+    /* The suffix at the site's scale (--wordmark-suffix-scale), so seven or eight letters fit. */
+    .suffix { font-size: 0.66em; }
+    .tagline {
+      --dot-pitch: 6px; --dot-radius: 2px; --shadow-offset: 10px;
+      --border-width: 3px; --border: 3px solid var(--border-strong);
+      margin: 0; padding: 14px 22px;
+      background: var(--surface-card);
+      font: var(--weight-bold) 28px/1.3 var(--font-mono);
+      letter-spacing: var(--tracking-meta); text-transform: uppercase; color: var(--text-1);
+    }
+    .tagline.cast::after { --dot-field: radial-gradient(circle at 50% 50%, var(--shadow-color) var(--dot-radius), transparent calc(var(--dot-radius) + 0.5px)); }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <h1 class="wordmark"><span class="ink-block tilt-cw" id="name">sumidos</span><span class="suffix">.notx.blue</span></h1>
+    <p class="tagline cast" id="tagline">Quem você segue e parou de postar</p>
+  </div>
+  <script>
+    const english = new URLSearchParams(location.search).get('host') === 'crickets.notx.blue';
+    if (english) {
+      document.documentElement.lang = 'en';
+      document.getElementById('name').textContent = 'crickets';
+      document.getElementById('tagline').textContent = 'Who you follow that stopped posting';
+    } else {
+      document.documentElement.lang = 'pt-BR';
+    }
+  </script>
+</body>
+</html>

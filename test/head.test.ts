@@ -8,6 +8,7 @@ describe('headText', () => {
       description: 'Find out who a Bluesky handle follows that stopped posting. Runs in your browser.',
       siteName: 'crickets.notx.blue',
       ogLocale: 'en',
+      imageAlt: 'crickets.notx.blue: who you follow that stopped posting',
     });
     expect(headText('sumidos.notx.blue', 'pt-BR')).toMatchObject({
       title: 'Contas que você segue e pararam de postar • sumidos.notx.blue',
@@ -25,6 +26,8 @@ describe('headTags', () => {
     const tags = headTags('crickets.notx.blue');
     expect(tags).toContain('<link rel="canonical" href="https://crickets.notx.blue/" />');
     expect(tags).toContain('<meta property="og:locale" content="en" />');
+    expect(tags).toContain('<meta property="og:image" content="https://crickets.notx.blue/og-crickets.notx.blue.png" />');
+    expect(tags).toContain('<meta name="twitter:card" content="summary_large_image" />');
     expect(tags).not.toContain('sumidos');
   });
 });

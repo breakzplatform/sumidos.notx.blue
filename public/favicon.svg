@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#551A8B"/><text x="16" y="23" font-family="Georgia, serif" font-size="22" font-weight="700" text-anchor="middle" fill="#fff">s</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- The avatar's card on its own, as in links.notx.blue: paper fill, black border,
+       hard shadow, transparent around. -->
+  <rect x="14" y="14" width="86" height="86" fill="#000"/>
+  <rect width="86" height="86" fill="#000"/>
+  <rect x="7" y="7" width="72" height="72" fill="#F4F1EA"/>
+  <!-- lucide-static 0.542.0 ghost.svg. -->
+  <g transform="translate(19 19) scale(2)" fill="none" stroke="#000" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M9 10h.01"/>
+    <path d="M15 10h.01"/>
+    <path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/>
+  </g>
+</svg>

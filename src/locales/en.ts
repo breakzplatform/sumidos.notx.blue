@@ -3,6 +3,7 @@ import type { Messages } from '../lib/i18n';
 export const en: Messages = {
   appTitle: 'Accounts you follow that stopped posting • {host}',
   description: 'Find out who a Bluesky handle follows that stopped posting. Runs in your browser.',
+  ogImageAlt: '{host}: who you follow that stopped posting',
   skip: 'Skip to content',
 
   'theme.light': 'light',

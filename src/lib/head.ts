@@ -14,6 +14,7 @@ export interface HeadText {
   siteName: string;
   /** Open Graph form, e.g. "pt_BR". */
   ogLocale: string;
+  imageAlt: string;
 }
 
 export function headText(host: string, locale: Locale): HeadText {
@@ -24,6 +25,7 @@ export function headText(host: string, locale: Locale): HeadText {
     description: format(messages, en, locale, 'description'),
     siteName,
     ogLocale: locale.replace('-', '_'),
+    imageAlt: format(messages, en, locale, 'ogImageAlt', { host: siteName }),
   };
 }
 
@@ -35,6 +37,8 @@ function escape(value: string): string {
 export function headTags(host: string): string {
   const head = headText(host, localeForHost(host));
   const url = `https://${host}/`;
+  // One card per domain, rendered by scripts/build-social.sh.
+  const image = `${url}og-${host}.png`;
   const meta = (attr: 'name' | 'property', key: string, content: string) =>
     `<meta ${attr}="${key}" content="${escape(content)}" />`;
   return [
@@ -47,8 +51,14 @@ export function headTags(host: string): string {
     meta('property', 'og:type', 'website'),
     meta('property', 'og:site_name', head.siteName),
     meta('property', 'og:locale', head.ogLocale),
-    meta('name', 'twitter:card', 'summary'),
+    meta('property', 'og:image', image),
+    meta('property', 'og:image:width', '1200'),
+    meta('property', 'og:image:height', '630'),
+    meta('property', 'og:image:alt', head.imageAlt),
+    meta('name', 'twitter:card', 'summary_large_image'),
     meta('name', 'twitter:title', head.title),
     meta('name', 'twitter:description', head.description),
+    meta('name', 'twitter:image', image),
+    meta('name', 'twitter:image:alt', head.imageAlt),
   ].join('\n    ');
 }
