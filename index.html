@@ -34,7 +34,7 @@
           <div class="panel-body stack">
             <div class="signin-body" id="account-box" hidden>
               <p class="lede" data-i18n="auth.pitch">
-                Entre com a sua conta para deixar de seguir quem sumiu da sua lista, ou continue sem login para consultar qualquer conta pública.
+                Entre com a sua conta para deixar de seguir quem sumiu da skyline, ou continue sem login para consultar qualquer conta pública.
               </p>
               <p class="signin-atmosphere"><strong data-i18n="auth.atmosphere">Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).</strong></p>
               <div class="signin-choices">
@@ -47,8 +47,9 @@
                   aria-controls="handle-form"
                   data-i18n="auth.signInOther"
                 >
-                  Entrar com outra conta da Atmosphere
+                  Entrar com o AT Proto
                 </button>
+                <button id="skip-sign-in" type="button" class="db-btn cast press" data-i18n="auth.skip">Continuar sem login</button>
               </div>
               <form id="handle-form" class="signin-form" novalidate hidden>
                 <label for="handle" data-i18n="auth.handleLabel">Seu handle ou servidor</label>
@@ -74,11 +75,17 @@
                 </p>
                 <p class="db-note auth-error" id="handle-error" role="alert" hidden></p>
               </form>
-              <button id="skip-sign-in" type="button" class="db-btn cast press signin-skip" data-i18n="auth.skip">Continuar sem login</button>
               <p class="db-note signin-status" id="signin-status"></p>
               <p id="auth-error" class="auth-error" role="alert" hidden></p>
             </div>
             <div id="lookup" class="stack">
+              <div id="anon-line" class="profile" hidden>
+                <div>
+                  <p class="name" data-i18n="auth.anonymous">Sem login</p>
+                  <p class="handle" data-i18n="auth.anonymousHint">Dá para consultar qualquer conta. Para deixar de seguir, entre com a sua.</p>
+                </div>
+                <button id="back-to-sign-in" type="button" class="db-btn cast press" data-i18n="auth.backToSignIn">Entrar</button>
+              </div>
               <div id="auth-in" class="profile" hidden>
                 <img id="auth-avatar" class="avatar" alt="" width="40" height="40" hidden />
                 <span id="auth-avatar-placeholder" class="avatar placeholder" aria-hidden="true"></span>
@@ -89,9 +96,9 @@
                 <button id="sign-out" type="button" class="db-btn cast press" data-i18n="auth.signOut">Sair</button>
               </div>
               <form id="search-form" class="stack" novalidate>
-                <p class="lede" data-i18n="search.lede">Descubra quem um @ segue no Bluesky e parou de postar.</p>
+                <p class="lede"><span data-i18n="search.lede">Descubra quem uma conta do Bluesky segue e parou de postar.</span> <span id="privacy-line">A consulta roda no seu navegador. Nada é guardado nem enviado para servidores nossos.</span></p>
                 <div class="field">
-                  <label for="actor" data-i18n="search.label">@ no Bluesky</label>
+                  <label for="actor" data-i18n="search.label">Handle no Bluesky</label>
                   <div class="row-input">
                     <span class="db-field"
                       ><input
@@ -126,14 +133,7 @@
                 </fieldset>
                 <p class="db-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
               </form>
-              <p class="status-line" id="status" role="status" data-i18n="status.idle">Digite um @ e clique em Verificar.</p>
-              <p class="db-note" id="privacy-line" data-i18n="privacy.public">
-                A consulta roda no seu navegador. Nada é guardado nem enviado para servidores nossos.
-              </p>
-              <p class="db-note" id="anon-line" hidden>
-                <span data-i18n="auth.anonymous">Sem login.</span>
-                <button id="back-to-sign-in" type="button" class="link-button" data-i18n="auth.backToSignIn">Entrar para deixar de seguir</button>
-              </p>
+              <p class="status-line" id="status" role="status" data-i18n="status.idle">Digite um handle e clique em Verificar.</p>
             </div>
           </div>
         </section>

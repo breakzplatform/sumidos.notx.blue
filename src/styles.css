@@ -263,11 +263,22 @@ main:focus {
   opacity: 1;
 }
 .db-select {
+  appearance: none;
   font: var(--type-compact);
   color: var(--text-1);
-  background: var(--surface-page);
   border: var(--border);
-  padding: 6px 8px;
+  border-radius: 0;
+  padding: 6px 32px 6px 10px;
+  /* A square chevron drawn in the text colour, so it follows the theme. */
+  background:
+    linear-gradient(45deg, transparent 50%, var(--text-1) 50%) calc(100% - 16px) 55% / 6px 6px no-repeat,
+    linear-gradient(135deg, var(--text-1) 50%, transparent 50%) calc(100% - 10px) 55% / 6px 6px no-repeat,
+    var(--surface-page);
+  cursor: pointer;
+}
+.db-select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .row-input {
@@ -367,26 +378,12 @@ main:focus {
 .signin-input-row .db-input {
   height: 56px;
 }
-.signin-skip {
-  width: 100%;
-  min-height: 56px;
-  font-size: var(--text-body);
-}
-.link-button {
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: var(--link, inherit);
-  text-decoration: underline;
-  cursor: pointer;
-}
 .signin-status:empty {
   display: none;
 }
 @media (min-width: 640px) {
   .signin-choices {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 .auth-error {

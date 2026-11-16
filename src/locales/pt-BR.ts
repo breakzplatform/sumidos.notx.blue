@@ -2,7 +2,7 @@ import type { Messages } from '../lib/i18n';
 
 export const ptBR: Messages = {
   appTitle: 'Contas que você segue e pararam de postar • {host}',
-  description: 'Descubra quem um @ segue no Bluesky e parou de postar. Roda no seu navegador.',
+  description: 'Descubra quem uma conta do Bluesky segue e parou de postar. Roda no seu navegador.',
   skip: 'Ir para o conteúdo',
 
   'theme.light': 'claro',
@@ -15,8 +15,8 @@ export const ptBR: Messages = {
     'A consulta roda no seu navegador. Nada é guardado nem enviado para servidores nossos. Com login, a sessão fica só nesta aba.',
 
   'search.title': 'Quem parou de postar',
-  'search.lede': 'Descubra quem um @ segue no Bluesky e parou de postar.',
-  'search.label': '@ no Bluesky',
+  'search.lede': 'Descubra quem uma conta do Bluesky segue e parou de postar.',
+  'search.label': 'Handle no Bluesky',
   'search.placeholder': 'voce.bsky.social',
   'search.run': 'Verificar',
   'search.stop': 'Parar',
@@ -31,10 +31,10 @@ export const ptBR: Messages = {
 
   'auth.title': 'Como você quer usar?',
   'auth.pitch':
-    'Entre com a sua conta para deixar de seguir quem sumiu da sua lista, ou continue sem login para consultar qualquer conta pública.',
+    'Entre com a sua conta para deixar de seguir quem sumiu da skyline, ou continue sem login para consultar qualquer conta pública.',
   'auth.atmosphere': 'Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).',
   'auth.signIn': 'Entrar com o Bluesky',
-  'auth.signInOther': 'Entrar com outra conta da Atmosphere',
+  'auth.signInOther': 'Entrar com o AT Proto',
   'auth.handleLabel': 'Seu handle ou servidor',
   'auth.handleHint': 'voce.exemplo.com ou https://pds.exemplo.com',
   'auth.continue': 'Continuar',
@@ -42,16 +42,17 @@ export const ptBR: Messages = {
     'Buscamos o servidor (PDS) do seu handle e levamos você até ele para entrar. Sua senha nunca passa por este site.',
   'auth.needHandle': 'Informe o handle.',
   'auth.skip': 'Continuar sem login',
-  'auth.anonymous': 'Sem login.',
-  'auth.backToSignIn': 'Entrar para deixar de seguir',
+  'auth.anonymous': 'Sem login',
+  'auth.anonymousHint': 'Dá para consultar qualquer conta. Para deixar de seguir, entre com a sua.',
+  'auth.backToSignIn': 'Entrar',
   'auth.signOut': 'Sair',
   'auth.unavailable': 'O login não funciona neste endereço.',
   'auth.redirecting': 'Abrindo o seu servidor…',
   'auth.failed': 'Não deu para entrar: {message}',
 
-  'status.idle': 'Digite um @ e clique em Verificar.',
+  'status.idle': 'Digite um handle e clique em Verificar.',
   'status.resolving': 'Procurando @{handle}…',
-  'status.invalid': 'Isso não parece um @, um DID ou um link de perfil.',
+  'status.invalid': 'Isso não parece um handle, um DID ou um link de perfil.',
   'status.notfound': 'Não achei @{handle}.',
   'status.deactivated': '@{handle} está desativada.',
   'status.takendown': '@{handle} foi suspensa.',
@@ -82,7 +83,7 @@ export const ptBR: Messages = {
     other: '{shown} de {count} contas no filtro',
   },
   'results.metaPublic': 'Lista pública de seguidos de @{handle}. Não dá para saber se esse @ é seu.',
-  'results.search': 'Nome ou @',
+  'results.search': 'Nome ou handle',
   'results.csv': 'Exportar CSV',
   'results.empty': 'Nenhuma conta corresponde ao filtro.',
   'results.more': { one: 'Mostrar mais {count}', other: 'Mostrar mais {count}' },
