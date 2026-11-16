@@ -29,114 +29,112 @@
       </header>
 
       <main id="conteudo" tabindex="-1">
-        <section class="cast" id="account-box" aria-labelledby="signin-title" hidden>
-          <h1 class="db-panel-head" id="signin-title"><span data-i18n="auth.title">Como você quer usar?</span></h1>
-          <div class="signin-body">
-            <p class="lede" data-i18n="auth.pitch">
-              Entre com a sua conta para deixar de seguir quem sumiu da sua lista, ou continue sem login para consultar qualquer conta pública.
-            </p>
-            <p class="signin-atmosphere"><strong data-i18n="auth.atmosphere">Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).</strong></p>
-            <div class="signin-choices">
-              <button id="bsky-sign-in" type="button" class="db-btn db-btn-primary cast press" data-i18n="auth.signIn">Entrar com o Bluesky</button>
-              <button
-                id="other-sign-in"
-                type="button"
-                class="db-btn cast press"
-                aria-expanded="false"
-                aria-controls="handle-form"
-                data-i18n="auth.signInOther"
-              >
-                Entrar com outra conta da Atmosphere
-              </button>
-            </div>
-            <form id="handle-form" class="signin-form" novalidate hidden>
-              <label for="handle" data-i18n="auth.handleLabel">Seu handle ou servidor</label>
-              <div class="signin-input-row">
-                <span class="db-field"
-                  ><input
-                    id="handle"
-                    class="db-input"
-                    name="handle"
-                    type="text"
-                    inputmode="url"
-                    autocomplete="username"
-                    autocapitalize="off"
-                    spellcheck="false"
-                    placeholder="voce.exemplo.com ou https://pds.exemplo.com"
-                    data-i18n-placeholder="auth.handleHint"
-                    aria-describedby="handle-note"
-                /></span>
-                <button type="submit" class="db-btn db-btn-primary cast press" data-i18n="auth.continue">Continuar</button>
-              </div>
-              <p class="db-note" id="handle-note" data-i18n="auth.explain">
-                Buscamos o servidor (PDS) do seu handle e levamos você até ele para entrar. Sua senha nunca passa por este site.
-              </p>
-              <p class="db-note auth-error" id="handle-error" role="alert" hidden></p>
-            </form>
-            <button id="skip-sign-in" type="button" class="db-btn cast press signin-skip" data-i18n="auth.skip">Continuar sem login</button>
-            <p class="db-note signin-status" id="signin-status"></p>
-            <p id="auth-error" class="auth-error" role="alert" hidden></p>
-          </div>
-        </section>
-
-        <section class="cast" id="lookup" aria-labelledby="search-title" hidden>
+        <section class="cast" aria-labelledby="search-title">
           <h1 class="db-panel-head" id="search-title"><span data-i18n="search.title">Quem parou de postar</span></h1>
           <div class="panel-body stack">
-            <div id="auth-in" class="profile" hidden>
-              <img id="auth-avatar" class="avatar" alt="" width="40" height="40" hidden />
-              <span id="auth-avatar-placeholder" class="avatar placeholder" aria-hidden="true"></span>
-              <div>
-                <p class="name" id="auth-name"></p>
-                <p class="handle" id="auth-handle"></p>
+            <div class="signin-body" id="account-box" hidden>
+              <p class="lede" data-i18n="auth.pitch">
+                Entre com a sua conta para deixar de seguir quem sumiu da sua lista, ou continue sem login para consultar qualquer conta pública.
+              </p>
+              <p class="signin-atmosphere"><strong data-i18n="auth.atmosphere">Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).</strong></p>
+              <div class="signin-choices">
+                <button id="bsky-sign-in" type="button" class="db-btn db-btn-primary cast press" data-i18n="auth.signIn">Entrar com o Bluesky</button>
+                <button
+                  id="other-sign-in"
+                  type="button"
+                  class="db-btn cast press"
+                  aria-expanded="false"
+                  aria-controls="handle-form"
+                  data-i18n="auth.signInOther"
+                >
+                  Entrar com outra conta da Atmosphere
+                </button>
               </div>
-              <button id="sign-out" type="button" class="db-btn cast press" data-i18n="auth.signOut">Sair</button>
-            </div>
-            <form id="search-form" class="stack" novalidate>
-              <p class="lede" data-i18n="search.lede">Descubra quem um @ segue no Bluesky e parou de postar.</p>
-              <div class="field">
-                <label for="actor" data-i18n="search.label">@ no Bluesky</label>
-                <div class="row-input">
+              <form id="handle-form" class="signin-form" novalidate hidden>
+                <label for="handle" data-i18n="auth.handleLabel">Seu handle ou servidor</label>
+                <div class="signin-input-row">
                   <span class="db-field"
                     ><input
-                      id="actor"
+                      id="handle"
                       class="db-input"
-                      name="actor"
+                      name="handle"
                       type="text"
-                      inputmode="email"
-                      autocomplete="off"
-                      autocapitalize="none"
+                      inputmode="url"
+                      autocomplete="username"
+                      autocapitalize="off"
                       spellcheck="false"
-                      placeholder="voce.bsky.social"
-                      data-i18n-placeholder="search.placeholder"
+                      placeholder="voce.exemplo.com ou https://pds.exemplo.com"
+                      data-i18n-placeholder="auth.handleHint"
+                      aria-describedby="handle-note"
                   /></span>
-                  <button id="run" type="submit" class="db-btn db-btn-primary cast press" data-i18n="search.run">Verificar</button>
-                  <button id="stop" type="button" class="db-btn cast press" disabled data-i18n="search.stop">Parar</button>
+                  <button type="submit" class="db-btn db-btn-primary cast press" data-i18n="auth.continue">Continuar</button>
                 </div>
+                <p class="db-note" id="handle-note" data-i18n="auth.explain">
+                  Buscamos o servidor (PDS) do seu handle e levamos você até ele para entrar. Sua senha nunca passa por este site.
+                </p>
+                <p class="db-note auth-error" id="handle-error" role="alert" hidden></p>
+              </form>
+              <button id="skip-sign-in" type="button" class="db-btn cast press signin-skip" data-i18n="auth.skip">Continuar sem login</button>
+              <p class="db-note signin-status" id="signin-status"></p>
+              <p id="auth-error" class="auth-error" role="alert" hidden></p>
+            </div>
+            <div id="lookup" class="stack">
+              <div id="auth-in" class="profile" hidden>
+                <img id="auth-avatar" class="avatar" alt="" width="40" height="40" hidden />
+                <span id="auth-avatar-placeholder" class="avatar placeholder" aria-hidden="true"></span>
+                <div>
+                  <p class="name" id="auth-name"></p>
+                  <p class="handle" id="auth-handle"></p>
+                </div>
+                <button id="sign-out" type="button" class="db-btn cast press" data-i18n="auth.signOut">Sair</button>
               </div>
-              <fieldset class="options">
-                <legend class="sr" data-i18n="rules.legend">O que conta como atividade</legend>
-                <label class="min-days"
-                  ><span data-i18n="rules.minDays">Sem postar há mais de</span>
-                  <select id="min-days" class="db-select">
-                    <option value="30">30</option>
-                    <option value="90" selected>90</option>
-                    <option value="180">180</option>
-                    <option value="365">365</option>
-                  </select></label
-                >
-                <label><input id="count-replies" type="checkbox" checked /> <span data-i18n="rules.replies">Contar respostas</span></label>
-                <label><input id="count-reposts" type="checkbox" /> <span data-i18n="rules.reposts">Contar reposts</span></label>
-              </fieldset>
-              <p class="db-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
-            </form>
-            <p class="status-line" id="status" role="status" data-i18n="status.idle">Digite um @ e clique em Verificar.</p>
-            <p class="db-note" id="privacy-line" data-i18n="privacy.public">
-              A consulta roda no seu navegador. Nada é guardado nem enviado para servidores nossos.
-            </p>
-            <p class="db-note" id="anon-line" hidden>
-              <span data-i18n="auth.anonymous">Sem login.</span>
-              <button id="back-to-sign-in" type="button" class="link-button" data-i18n="auth.backToSignIn">Entrar para deixar de seguir</button>
-            </p>
+              <form id="search-form" class="stack" novalidate>
+                <p class="lede" data-i18n="search.lede">Descubra quem um @ segue no Bluesky e parou de postar.</p>
+                <div class="field">
+                  <label for="actor" data-i18n="search.label">@ no Bluesky</label>
+                  <div class="row-input">
+                    <span class="db-field"
+                      ><input
+                        id="actor"
+                        class="db-input"
+                        name="actor"
+                        type="text"
+                        inputmode="email"
+                        autocomplete="off"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        placeholder="voce.bsky.social"
+                        data-i18n-placeholder="search.placeholder"
+                    /></span>
+                    <button id="run" type="submit" class="db-btn db-btn-primary cast press" data-i18n="search.run">Verificar</button>
+                    <button id="stop" type="button" class="db-btn cast press" disabled data-i18n="search.stop">Parar</button>
+                  </div>
+                </div>
+                <fieldset class="options">
+                  <legend class="sr" data-i18n="rules.legend">O que conta como atividade</legend>
+                  <label class="min-days"
+                    ><span data-i18n="rules.minDays">Sem postar há mais de</span>
+                    <select id="min-days" class="db-select">
+                      <option value="30">30</option>
+                      <option value="90" selected>90</option>
+                      <option value="180">180</option>
+                      <option value="365">365</option>
+                    </select></label
+                  >
+                  <label><input id="count-replies" type="checkbox" checked /> <span data-i18n="rules.replies">Contar respostas</span></label>
+                  <label><input id="count-reposts" type="checkbox" /> <span data-i18n="rules.reposts">Contar reposts</span></label>
+                </fieldset>
+                <p class="db-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
+              </form>
+              <p class="status-line" id="status" role="status" data-i18n="status.idle">Digite um @ e clique em Verificar.</p>
+              <p class="db-note" id="privacy-line" data-i18n="privacy.public">
+                A consulta roda no seu navegador. Nada é guardado nem enviado para servidores nossos.
+              </p>
+              <p class="db-note" id="anon-line" hidden>
+                <span data-i18n="auth.anonymous">Sem login.</span>
+                <button id="back-to-sign-in" type="button" class="link-button" data-i18n="auth.backToSignIn">Entrar para deixar de seguir</button>
+              </p>
+            </div>
           </div>
         </section>
 

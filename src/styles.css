@@ -14,6 +14,7 @@
 @import url('./ds/halftone.css');
 @import url('./ds/base.css');
 @import url('./ds/neo.css');
+@import url('./ds/notx-shell.css');
 
 /* Project ink: violet. The terminal theme keeps its own amber ink. */
 :root,
@@ -115,7 +116,7 @@ main:focus {
    does not fit the column; the clamp keeps the name on one line at 320px. */
 .db-wordmark {
   --wordmark-suffix-scale: 0.66;
-  margin: var(--space-10) 0 var(--space-8);
+  margin: var(--space-10) 0 var(--space-6);
   font: var(--weight-display) clamp(30px, 9.6vw, 96px) / 1.1 var(--font-display);
   letter-spacing: var(--tracking-display);
   color: var(--text-1);
@@ -152,9 +153,6 @@ main:focus {
 
 /* ---------------------------------------------------------------- panels */
 
-section.cast {
-  margin: 0 0 var(--space-10);
-}
 .db-panel-head {
   display: flex;
   align-items: center;
@@ -176,9 +174,6 @@ section.cast {
 .db-panel-status {
   flex: none;
   white-space: nowrap;
-}
-.panel-body {
-  padding: var(--box-pad);
 }
 
 .lede {
@@ -324,7 +319,12 @@ section.cast {
 .signin-body {
   display: grid;
   gap: var(--space-6);
-  padding: var(--space-6);
+  padding-bottom: 16px;
+  border-bottom: var(--border-dot);
+}
+/* Before the setup choice the form shows what comes next, but takes no input. */
+#lookup.waiting {
+  opacity: 0.4;
 }
 .signin-body p {
   margin: 0;
@@ -684,88 +684,4 @@ dialog::backdrop {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
-}
-
-/* ---------------------------------------------------------------- footer */
-
-/* Same rhythm as the notx.blue footer: 24px between its lines. */
-footer {
-  margin-top: var(--space-10);
-}
-footer > *,
-footer > .db-note {
-  margin: 0 0 var(--space-8);
-}
-.foot {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-1) 0;
-}
-.foot > span {
-  white-space: nowrap;
-}
-.foot > span:not(:last-child)::after {
-  content: ' ·';
-  color: var(--text-3);
-  padding-right: 0.4em;
-}
-.center {
-  text-align: center;
-}
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  justify-content: center;
-  align-items: center;
-}
-.chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 9px;
-  font: var(--type-label);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-meta);
-  text-decoration: none;
-}
-a.chip-pix,
-a.chip-pix:visited,
-a.chip-pix:hover {
-  background: var(--ink-pix);
-  color: var(--on-pix);
-}
-a.chip-mp,
-a.chip-mp:visited,
-a.chip-mp:hover {
-  background: #00b1ea;
-  color: #000;
-}
-a.chip-coffee,
-a.chip-coffee:visited,
-a.chip-coffee:hover {
-  background: var(--ink-yellow);
-  color: var(--on-yellow);
-}
-a.chip-sponsors,
-a.chip-sponsors:visited,
-a.chip-sponsors:hover {
-  background: var(--ink-sponsors);
-  color: var(--on-sponsors);
-}
-
-/* ---------------------------------------------------------------- faq */
-
-.faq {
-  display: grid;
-  gap: var(--space-6);
-}
-.faq summary {
-  cursor: pointer;
-  font-weight: var(--weight-bold);
-  color: var(--text-1);
-}
-.faq details p {
-  margin: var(--space-4) 0 0;
-  color: var(--text-2);
 }

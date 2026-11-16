@@ -260,7 +260,8 @@ function renderAuth(): void {
   const chosen = !canSignIn || Boolean(session) || state.anonymous;
   el.privacy.textContent = t(session ? 'privacy.session' : 'privacy.public');
   el.accountBox.hidden = chosen || state.restoring;
-  el.lookup.hidden = !chosen;
+  el.lookup.inert = !chosen;
+  el.lookup.classList.toggle('waiting', !chosen);
   el.anonLine.hidden = !canSignIn || Boolean(session) || !state.anonymous;
   el.authIn.hidden = !session;
   if (!session) return;
