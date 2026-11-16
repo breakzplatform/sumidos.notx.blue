@@ -150,7 +150,7 @@ export const en: Messages = {
   'undo.running': 'Following again… {done} of {total}',
   'undo.done': { one: 'Done: {count} account followed again.', other: 'Done: {count} accounts followed again.' },
 
-  'faq.title': 'Questions',
+  'faq.title': 'FAQ',
   'faq.login.q': 'Do I need to sign in?',
   'faq.login.a':
     'No. Without signing in you can check the public list of who any account follows. Signing in is only needed to unfollow accounts on your own list.',

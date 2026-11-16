@@ -85,46 +85,47 @@ a.chip-sponsors:hover {
 }
 
 /* ---------------------------------------------------------------- faq */
-/* Same list as espelho.notx.blue. */
+/* Same list, class names and type as links.notx.blue and espelho.notx.blue. */
 
-.faq {
+.faq-list {
   display: flex;
   flex-direction: column;
   padding: 0;
 }
-.faq details {
+.faq-item {
   border-bottom: var(--border-dot);
 }
-.faq details:last-child {
+.faq-item:last-child {
   border-bottom: 0;
 }
-.faq summary {
+.faq-item summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  min-height: 44px;
+  min-height: var(--target);
   padding: var(--space-4) var(--space-6);
   font: var(--weight-bold) var(--text-body-sm) / 1.35 var(--font-body);
   cursor: pointer;
   list-style: none;
 }
-.faq summary::-webkit-details-marker {
+.faq-item summary::-webkit-details-marker {
   display: none;
 }
-.faq summary::after {
+.faq-item summary::after {
   content: '+';
   font-family: var(--font-mono);
-  flex: 0 0 auto;
+  flex: none;
 }
-.faq details[open] summary::after {
+.faq-item[open] summary::after {
   content: '−';
 }
-.faq details[open] summary {
+.faq-item[open] summary {
   color: var(--project-ink);
 }
-.faq details p {
+.faq-item p {
   margin: 0;
   padding: 0 var(--space-6) var(--space-5);
   color: var(--text-2);
+  font: var(--type-dek);
 }
