@@ -117,7 +117,7 @@ main:focus {
 .db-wordmark {
   --wordmark-suffix-scale: 0.66;
   margin: var(--space-10) 0 var(--space-6);
-  font: var(--weight-display) clamp(30px, 9.6vw, 96px) / 1.1 var(--font-display);
+  font: var(--weight-display) clamp(var(--text-display-1), 13vw, 116px) / 1.1 var(--font-display);
   letter-spacing: var(--tracking-display);
   color: var(--text-1);
   text-align: center;
@@ -126,6 +126,15 @@ main:focus {
 .wordmark-suffix {
   font-size: calc(var(--wordmark-suffix-scale) * 1em);
   letter-spacing: var(--tracking-display);
+}
+/* Same as espelho.notx.blue: the suffix drops under the name on phones. */
+@media (max-width: 559px) {
+  .db-wordmark {
+    white-space: normal;
+  }
+  .wordmark-suffix {
+    display: block;
+  }
 }
 .db-wordmark a,
 .db-wordmark a:visited,

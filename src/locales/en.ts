@@ -14,7 +14,7 @@ export const en: Messages = {
   'privacy.session':
     'The lookup runs in your browser. Nothing is sent to our servers, and the last list is saved in this browser only. When signed in, the session stays in this tab only.',
 
-  'search.title': 'Who stopped posting',
+  'search.title': 'Who stopped posting?',
   'search.lede': 'Find out who a Bluesky handle follows that stopped posting.',
   'search.label': 'Bluesky handle',
   'search.placeholder': 'you.bsky.social',

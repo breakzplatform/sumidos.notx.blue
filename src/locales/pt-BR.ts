@@ -14,7 +14,7 @@ export const ptBR: Messages = {
   'privacy.session':
     'A consulta roda no seu navegador. Nada é enviado para servidores nossos, e a última lista fica salva só neste navegador. Com login, a sessão fica só nesta aba.',
 
-  'search.title': 'Quem parou de postar',
+  'search.title': 'Quem parou de postar?',
   'search.lede': 'Descubra quem uma conta do Bluesky segue e parou de postar.',
   'search.label': 'Conta no Bluesky',
   'search.placeholder': 'voce.bsky.social',
