@@ -52,7 +52,7 @@
                 <button id="skip-sign-in" type="button" class="db-btn cast press" data-i18n="auth.skip">Continuar sem login</button>
               </div>
               <form id="handle-form" class="signin-form" novalidate hidden>
-                <label for="handle" data-i18n="auth.handleLabel">Sua arroba ou servidor</label>
+                <label for="handle" data-i18n="auth.handleLabel">Sua conta ou servidor</label>
                 <div class="signin-input-row">
                   <span class="db-field"
                     ><input
@@ -79,12 +79,9 @@
               <p id="auth-error" class="auth-error" role="alert" hidden></p>
             </div>
             <div id="lookup" class="stack">
-              <div id="anon-line" class="profile" hidden>
-                <div>
-                  <p class="name" data-i18n="auth.anonymous">Sem login</p>
-                  <p class="handle" data-i18n="auth.anonymousHint">Dá para consultar qualquer conta. Para deixar de seguir, entre com a sua.</p>
-                </div>
-                <button id="back-to-sign-in" type="button" class="db-btn cast press" data-i18n="auth.backToSignIn">Entrar</button>
+              <div id="anon-line" class="anon-box" hidden>
+                <p data-i18n="auth.anonymous">Sem login: dá para consultar qualquer conta. Para deixar de seguir, entre com a sua.</p>
+                <button id="back-to-sign-in" type="button" class="db-btn db-btn-sm cast press" data-i18n="auth.backToSignIn">Entrar</button>
               </div>
               <div id="auth-in" class="profile" hidden>
                 <img id="auth-avatar" class="avatar" alt="" width="40" height="40" hidden />
@@ -96,9 +93,9 @@
                 <button id="sign-out" type="button" class="db-btn cast press" data-i18n="auth.signOut">Sair</button>
               </div>
               <form id="search-form" class="stack" novalidate>
-                <p class="lede"><span data-i18n="search.lede">Descubra quem uma conta do Bluesky segue e parou de postar.</span> <span id="privacy-line">A consulta roda no seu navegador. Nada é guardado nem enviado para servidores nossos.</span></p>
+                <p class="lede"><span data-i18n="search.lede">Descubra quem uma conta do Bluesky segue e parou de postar.</span> <span id="privacy-line">A consulta roda no seu navegador. Nada é enviado para servidores nossos, e a última lista fica salva só neste navegador.</span></p>
                 <div class="field">
-                  <label for="actor" data-i18n="search.label">Arroba no Bluesky</label>
+                  <label for="actor" data-i18n="search.label">Conta no Bluesky</label>
                   <div class="row-input">
                     <span class="db-field"
                       ><input
@@ -133,7 +130,7 @@
                 </fieldset>
                 <p class="db-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
               </form>
-              <p class="status-line" id="status" role="status" data-i18n="status.idle">Digite uma arroba e clique em Verificar.</p>
+              <p class="status-line" id="status" role="status" data-i18n="status.idle">Digite uma conta e clique em Verificar.</p>
             </div>
           </div>
         </section>
@@ -163,6 +160,10 @@
               <span class="db-field"><input id="search" class="db-input" type="search" autocomplete="off" spellcheck="false" /></span>
             </div>
             <p class="list-note" id="results-note"></p>
+            <div class="saved-note" id="saved-note" hidden>
+              <p class="db-note" id="saved-text"></p>
+              <button id="clear-saved" type="button" class="db-btn db-btn-sm cast press" data-i18n="saved.clear">Apagar lista salva</button>
+            </div>
             <div class="results-bar">
               <p class="db-meta" id="results-meta"></p>
               <button id="csv" type="button" class="db-btn db-btn-sm cast press" data-i18n="results.csv">Exportar CSV</button>
@@ -180,10 +181,50 @@
           </div>
           <ol class="accounts" id="list"></ol>
           <p class="empty" id="empty" hidden data-i18n="results.empty">Nenhuma conta corresponde ao filtro.</p>
-          <div class="more" id="more-box" hidden>
-            <button id="more" type="button" class="db-btn cast press"></button>
-          </div>
+          <p class="loading-note" id="loading-note" role="status" hidden></p>
+          <nav class="pager" id="pager" aria-label="Páginas" hidden>
+            <label class="per-page"
+              ><span data-i18n="pager.perPage">Por página</span>
+              <select id="per-page" class="db-select">
+                <option value="20" selected>20</option>
+                <option value="40">40</option>
+                <option value="60">60</option>
+              </select></label
+            >
+            <span class="pager-steps">
+              <button id="prev-page" type="button" class="db-btn db-btn-sm cast press" data-i18n="pager.prev">Anterior</button>
+              <span class="db-meta" id="page-label"></span>
+              <button id="next-page" type="button" class="db-btn db-btn-sm cast press" data-i18n="pager.next">Próxima</button>
+            </span>
+          </nav>
         </section>
+
+        <section class="cast" id="unfollowed" aria-labelledby="unfollowed-title" hidden>
+
+          <h2 class="db-panel-head" id="unfollowed-title">
+
+            <span data-i18n="unfollowed.title">Deixou de seguir</span><span class="db-panel-status" id="unfollowed-count"></span>
+
+          </h2>
+
+          <div class="panel-body stack">
+
+            <p class="db-note" data-i18n="unfollowed.note">Quem você deixou de seguir por aqui fica salvo neste navegador. Seguir de novo volta com a data original.</p>
+
+            <div class="owner-bar">
+
+              <button id="refollow-all" type="button" class="db-btn cast press"></button>
+
+              <p class="db-note" id="refollow-status" role="status"></p>
+
+            </div>
+
+          </div>
+
+          <ol class="accounts" id="unfollowed-list"></ol>
+
+        </section>
+
 
         <section class="cast" id="faq" aria-labelledby="faq-title">
           <h2 class="db-panel-head" id="faq-title"><span data-i18n="faq.title">Perguntas frequentes</span></h2>
@@ -198,11 +239,11 @@
             </details>
             <details>
               <summary data-i18n="faq.data.q">Meus dados vão para algum servidor?</summary>
-              <p data-i18n="faq.data.a">Não. A consulta roda no seu navegador, direto na API pública do Bluesky. No login, você entra pelo seu próprio servidor e a senha nunca passa por este site. A permissão cobre só seguir e deixar de seguir.</p>
+              <p data-i18n="faq.data.a">Não. A consulta roda no seu navegador, direto na API pública do Bluesky. A última lista e quem você deixou de seguir ficam salvos só neste navegador. No login, você entra pelo seu próprio servidor e a senha nunca passa por este site. A permissão cobre só seguir e deixar de seguir.</p>
             </details>
             <details>
               <summary data-i18n="faq.undo.q">Dá para desfazer?</summary>
-              <p data-i18n="faq.undo.a">Sim. Depois de deixar de seguir, Desfazer volta a seguir as mesmas contas, com a data original, enquanto esta aba estiver aberta.</p>
+              <p data-i18n="faq.undo.a">Sim. Depois de deixar de seguir, Desfazer volta a seguir as mesmas contas, com a data original, enquanto esta aba estiver aberta. Depois disso, use o painel Deixou de seguir.</p>
             </details>
             <details>
               <summary data-i18n="faq.deactivated.q">Por que uma conta desativada não aparece?</summary>
@@ -226,7 +267,7 @@
           >
         </p>
         <p class="db-note center" data-i18n="footer.fromBrazil">
-          Direto do Brasil pelo Joselito, com muito carinho. Este site não usa cookies nem analytics. Idioma e tema ficam neste navegador. Não tem relação com o Bluesky.
+          Direto do Brasil pelo Joselito, com muito carinho. Este site não usa cookies nem analytics. Idioma, tema e a última lista ficam neste navegador. Não tem relação com o Bluesky.
         </p>
         <div class="chips">
           <span class="db-meta" data-i18n="footer.support">Apoie este projeto:</span>

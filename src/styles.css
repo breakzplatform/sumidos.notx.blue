@@ -378,6 +378,22 @@ main:focus {
 .signin-input-row .db-input {
   height: 56px;
 }
+.anon-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  border: var(--border);
+  background: var(--surface-sunken);
+}
+.anon-box p {
+  margin: 0;
+  flex: 1 1 260px;
+  font: var(--type-dek);
+  color: var(--text-2);
+}
 .signin-status:empty {
   display: none;
 }
@@ -634,10 +650,73 @@ progress::-moz-progress-bar {
   border-top: var(--border);
   color: var(--text-2);
 }
-.more {
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+  align-items: center;
+  justify-content: space-between;
   padding: var(--space-6);
   border-top: var(--border);
-  text-align: center;
+}
+.per-page {
+  display: inline-flex;
+  gap: var(--space-4);
+  align-items: center;
+  font: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.pager-steps {
+  display: inline-flex;
+  gap: var(--space-6);
+  align-items: center;
+}
+.pager-steps .db-meta {
+  margin: 0;
+}
+.loading-note {
+  margin: 0;
+  padding: var(--space-5) var(--space-6);
+  border-top: var(--border);
+  font: var(--type-meta);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.account.skeleton .avatar,
+.account.skeleton .bar {
+  background: var(--surface-sunken);
+}
+.account.skeleton .bar {
+  display: block;
+  height: 12px;
+  width: 45%;
+  margin: 4px 0;
+}
+.account.skeleton .bar.short {
+  width: 25%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .account.skeleton {
+    animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
+  }
+}
+@keyframes skeleton-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.45;
+  }
+}
+.saved-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* ---------------------------------------------------------------- dialog */

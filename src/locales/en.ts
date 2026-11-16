@@ -10,9 +10,9 @@ export const en: Messages = {
   'theme.terminal': 'terminal',
   'theme.aria': 'Theme: {current}, tap for {next}',
 
-  'privacy.public': 'The lookup runs in your browser. Nothing is stored or sent to our servers.',
+  'privacy.public': 'The lookup runs in your browser. Nothing is sent to our servers, and the last list is saved in this browser only.',
   'privacy.session':
-    'The lookup runs in your browser. Nothing is stored or sent to our servers. When signed in, the session stays in this tab only.',
+    'The lookup runs in your browser. Nothing is sent to our servers, and the last list is saved in this browser only. When signed in, the session stays in this tab only.',
 
   'search.title': 'Who stopped posting',
   'search.lede': 'Find out who a Bluesky handle follows that stopped posting.',
@@ -42,8 +42,7 @@ export const en: Messages = {
     'We look up the server (PDS) behind your handle and send you there to sign in. Your password never touches this site.',
   'auth.needHandle': 'Enter your handle.',
   'auth.skip': 'Continue without signing in',
-  'auth.anonymous': 'Not signed in',
-  'auth.anonymousHint': 'You can check any account. To unfollow, sign in with yours.',
+  'auth.anonymous': 'Not signed in: you can check any account. To unfollow, sign in with yours.',
   'auth.backToSignIn': 'Sign in',
   'auth.signOut': 'Sign out',
   'auth.unavailable': 'Sign-in does not work on this address.',
@@ -86,7 +85,21 @@ export const en: Messages = {
   'results.search': 'Name or handle',
   'results.csv': 'Export CSV',
   'results.empty': 'No account matches the filter.',
-  'results.more': { one: 'Show {count} more', other: 'Show {count} more' },
+  'saved.note': 'List saved on {date}. Check reads it again.',
+  'saved.clear': 'Delete saved list',
+  'unfollowed.title': 'Unfollowed',
+  'unfollowed.note': 'Everyone you unfollowed here is saved in this browser. Follow again brings back the original date.',
+  'unfollowed.all': { one: 'Follow again', other: 'Follow all again ({count})' },
+  'unfollowed.one': 'Follow again',
+  'unfollowed.at': 'Unfollowed on {date}',
+  'pager.perPage': 'Per page',
+  'pager.prev': 'Previous',
+  'pager.next': 'Next',
+  'pager.page': 'Page {page} of {pages}',
+  'results.loading': {
+    one: 'Reading… {count} account so far. The sorted list shows up at the end.',
+    other: 'Reading… {count} accounts so far. The sorted list shows up at the end.',
+  },
   'results.failed': {
     one: '{count} account did not load. Continue tries again.',
     other: '{count} accounts did not load. Continue tries again.',
@@ -147,10 +160,10 @@ export const en: Messages = {
     "The date of the account's last activity. Replies and reposts count when those options are checked. Anyone past the chosen period shows up on the list.",
   'faq.data.q': 'Does my data go to a server?',
   'faq.data.a':
-    "No. The lookup runs in your browser, straight against Bluesky's public API. When you sign in, you do it on your own server and your password never passes through this site. The permission only covers following and unfollowing.",
+    "No. The lookup runs in your browser, straight against Bluesky's public API. The last list and the accounts you unfollowed are saved in this browser only. When you sign in, you do it on your own server and your password never passes through this site. The permission only covers following and unfollowing.",
   'faq.undo.q': 'Can I undo it?',
   'faq.undo.a':
-    'Yes. After unfollowing, Undo follows the same accounts again, with the original date, while this tab stays open.',
+    'Yes. After unfollowing, Undo follows the same accounts again, with the original date, while this tab stays open. After that, use the Unfollowed panel.',
   'faq.deactivated.q': "Why doesn't a deactivated account show up?",
   'faq.deactivated.a':
     'A deactivated account drops out of the public list of who someone follows. It only shows up when you sign in and look at your own list.',
@@ -165,6 +178,6 @@ export const en: Messages = {
   'footer.source': 'view-source',
   'footer.privacy': 'Privacy',
   'footer.fromBrazil':
-    'Directly from Brazil by Joselito, with much love and care. This site uses no cookies and no analytics. Language and theme stay in this browser. It is not related to Bluesky.',
+    'Directly from Brazil by Joselito, with much love and care. This site uses no cookies and no analytics. Language, theme and the last list stay in this browser. It is not related to Bluesky.',
   'footer.support': 'Support this project:',
 };

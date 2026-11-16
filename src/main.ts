@@ -11,6 +11,7 @@ import type { OAuthSession } from './lib/oauth';
 import { allowedHosts, oauthTarget, parseHostList } from './lib/oauth-metadata';
 import { ActorError, LARGE_LIST, resumeFeeds, scan, type ScanPhase, type ScanProgress, type ScanSubject } from './lib/scan';
 import { Selection } from './lib/selection';
+import { clearList, loadList, loadUnfollowed, saveList, saveUnfollowed, type UnfollowedMap } from './lib/saved';
 import { localeForHost, siteNameFor } from './lib/site';
 import type { Account } from './lib/types';
 import {
@@ -30,7 +31,8 @@ import { cycleTheme, getTheme, nextTheme, onRemoteThemeChange, type Theme } from
 // ---------------------------------------------------------------------------
 // Setup
 
-const PAGE = 200;
+const PER_PAGE_OPTIONS = [20, 40, 60] as const;
+const SKELETON_ROWS = 6;
 const LANG_KEY = 'lang';
 const ANONYMOUS_KEY = 'sumidos.anonymous';
 const BUG_FORM = { en: 'https://q.joseli.to/forms/notx-blue-bugs', 'pt-BR': 'https://q.joseli.to/forms/notx-blue-bugs-pt' };
@@ -73,7 +75,12 @@ const state = {
   status: { key: 'status.idle' } as StatusKey,
   session: null as OAuthSession | null,
   sessionProfile: null as SessionProfile | null,
-  shown: PAGE,
+  page: 0,
+  perPage: PER_PAGE_OPTIONS[0] as number,
+  /** When the list on screen came from this browser's storage. */
+  savedAt: null as string | null,
+  /** Everyone the signed-in account unfollowed here, kept across visits. */
+  unfollowed: {} as UnfollowedMap,
   selection: new Selection(),
   undo: new Map<string, StoredFollow[]>(),
   undoAccounts: new Map<string, Account>(),
@@ -108,8 +115,20 @@ const el = {
   search: byId<HTMLInputElement>('search'),
   list: byId<HTMLOListElement>('list'),
   empty: byId('empty'),
-  moreBox: byId('more-box'),
-  more: byId<HTMLButtonElement>('more'),
+  loadingNote: byId('loading-note'),
+  pager: byId('pager'),
+  perPage: byId<HTMLSelectElement>('per-page'),
+  prevPage: byId<HTMLButtonElement>('prev-page'),
+  nextPage: byId<HTMLButtonElement>('next-page'),
+  pageLabel: byId('page-label'),
+  savedNote: byId('saved-note'),
+  savedText: byId('saved-text'),
+  clearSaved: byId<HTMLButtonElement>('clear-saved'),
+  unfollowedBox: byId('unfollowed'),
+  unfollowedCount: byId('unfollowed-count'),
+  unfollowedList: byId<HTMLOListElement>('unfollowed-list'),
+  refollowAll: byId<HTMLButtonElement>('refollow-all'),
+  refollowStatus: byId('refollow-status'),
   ownerBar: byId('owner-bar'),
   markAll: byId<HTMLButtonElement>('mark-all'),
   markNone: byId<HTMLButtonElement>('mark-none'),
@@ -228,6 +247,7 @@ function scheduleRender(): void {
 }
 
 function renderAll(): void {
+  renderUnfollowed();
   renderStatus();
   renderAuth();
   renderProgress();
@@ -339,6 +359,19 @@ function rowNode(row: Row, owner: boolean): HTMLLIElement {
   return li;
 }
 
+function skeletonRow(): HTMLLIElement {
+  return h(
+    'li',
+    { class: 'account skeleton', 'aria-hidden': 'true' },
+    h('span', { class: 'avatar' }),
+    h('span', { class: 'who' }, h('span', { class: 'bar' }), h('span', { class: 'bar short' })),
+  );
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString(i18n.locale, { dateStyle: 'short', timeStyle: 'short' });
+}
+
 function renderResults(): void {
   const subject = state.subject;
   el.results.hidden = !subject || state.accounts.length === 0;
@@ -357,11 +390,28 @@ function renderResults(): void {
   el.resultsNote.textContent = notes.join(' ');
   el.resultsNote.hidden = notes.length === 0;
 
-  const page = all.slice(0, state.shown);
-  el.list.replaceChildren(...page.map((r) => rowNode(r, owner)));
-  el.empty.hidden = all.length > 0 || Boolean(state.abort);
-  el.moreBox.hidden = all.length <= page.length;
-  el.more.textContent = t('results.more', { count: Math.min(PAGE, all.length - page.length) });
+  // While reading, rows would keep jumping as the sort changes: show a
+  // placeholder and the count, and the sorted list once the read ends.
+  const reading = Boolean(state.abort);
+  el.loadingNote.hidden = !reading;
+  if (reading) {
+    el.loadingNote.textContent = t('results.loading', { count: state.accounts.length });
+    el.list.replaceChildren(...Array.from({ length: SKELETON_ROWS }, skeletonRow));
+    el.empty.hidden = true;
+    el.pager.hidden = true;
+  } else {
+    const pages = Math.max(1, Math.ceil(all.length / state.perPage));
+    state.page = Math.min(state.page, pages - 1);
+    const start = state.page * state.perPage;
+    el.list.replaceChildren(...all.slice(start, start + state.perPage).map((r) => rowNode(r, owner)));
+    el.empty.hidden = all.length > 0;
+    el.pager.hidden = all.length <= PER_PAGE_OPTIONS[0];
+    el.pageLabel.textContent = t('pager.page', { page: state.page + 1, pages });
+    el.prevPage.disabled = state.page === 0;
+    el.nextPage.disabled = state.page >= pages - 1;
+  }
+  el.savedNote.hidden = !state.savedAt || reading;
+  if (state.savedAt) el.savedText.textContent = t('saved.note', { date: formatDate(state.savedAt) });
 
   el.ownerBar.hidden = !owner;
   if (owner) {
@@ -448,7 +498,8 @@ async function startScan(): Promise<void> {
     lastActor: actor,
     lastPhase: null,
     progress: { phase: 'resolve', done: 0, total: 1 },
-    shown: PAGE,
+    page: 0,
+    savedAt: null,
   });
   state.selection.clear();
   state.undo.clear();
@@ -502,6 +553,40 @@ function finishScan(cancelled: boolean): void {
   if (cancelled) setStatus('status.stopped', { done: read, total });
   else if (total === 0) setStatus('status.none', { handle: state.subject?.handle ?? '' });
   else setStatus('status.done', { count: total });
+  persistList();
+  renderAll();
+}
+
+function persistList(): void {
+  if (!state.subject) return;
+  void saveList({
+    savedAt: new Date().toISOString(),
+    subject: state.subject,
+    owned: state.owned,
+    partial: state.stopped,
+    accounts: state.accounts,
+  });
+}
+
+function turnPage(step: number): void {
+  state.page += step;
+  renderResults();
+  el.results.scrollIntoView({ block: 'start' });
+}
+
+async function restoreList(): Promise<void> {
+  const saved = await loadList();
+  if (!saved || state.subject || state.abort) return;
+  Object.assign(state, {
+    subject: saved.subject,
+    accounts: saved.accounts,
+    owned: saved.owned,
+    stopped: saved.partial,
+    lastActor: saved.subject.handle,
+    lastPhase: 'feeds',
+    savedAt: saved.savedAt,
+  });
+  if (!el.actor.value) el.actor.value = saved.subject.handle;
   renderAll();
 }
 
@@ -588,12 +673,20 @@ async function runUnfollow(targets: string[]): Promise<void> {
     confirmProgress({ done: 0, failed: 0, total: plan.batches.reduce((n, b) => n + b.subjects.length, 0) });
     const run = await runBatches({ owner, repo, batches: plan.batches, signal: writeAbort.signal, onProgress: confirmProgress });
 
-    for (const [did, records] of keepForUndo(plan, run.done)) state.undo.set(did, records);
+    const at = new Date().toISOString();
+    const byDid = new Map(state.accounts.map((a) => [a.did, a]));
+    for (const [did, records] of keepForUndo(plan, run.done)) {
+      state.undo.set(did, records);
+      const account = byDid.get(did);
+      if (account) state.unfollowed[did] = { account, records, at };
+    }
+    void saveUnfollowed(owner, state.unfollowed);
     const gone = new Set(run.done);
     for (const a of state.accounts) if (gone.has(a.did)) state.undoAccounts.set(a.did, a);
     state.accounts = state.accounts.filter((a) => !gone.has(a.did));
     state.selection.forget(run.done);
     state.selection.forget(plan.notFollowing);
+    persistList();
 
     const note: StatusKey[] = [{ key: 'undo.text', params: { count: run.done.length } }];
     if (run.failed.length) note.push({ key: 'undo.failed', params: { count: run.failed.length } });
@@ -607,6 +700,73 @@ async function runUnfollow(targets: string[]): Promise<void> {
     closeConfirm();
     renderAll();
   }
+}
+
+async function refollow(dids: string[]): Promise<void> {
+  const session = state.session;
+  if (!session || state.busyWriting || dids.length === 0) return;
+  const removed = new Map<string, StoredFollow[]>();
+  for (const did of dids) {
+    const entry = state.unfollowed[did];
+    if (entry) removed.set(did, entry.records);
+  }
+  state.busyWriting = true;
+  renderAll();
+  const onProgress = (p: BatchProgress) => {
+    el.refollowStatus.textContent = t('undo.running', { done: p.done + p.failed, total: p.total });
+  };
+  onProgress({ done: 0, failed: 0, total: removed.size });
+  try {
+    const run = await runBatches({ owner: session.sub, repo: sessionRepo(session), batches: planRefollow(removed), onProgress });
+    for (const did of run.done) {
+      const back = state.unfollowed[did];
+      delete state.unfollowed[did];
+      state.undo.delete(did);
+      state.undoAccounts.delete(did);
+      if (back && isOwner() && !state.accounts.some((a) => a.did === did)) state.accounts.push(back.account);
+    }
+    await saveUnfollowed(session.sub, state.unfollowed);
+    persistList();
+    const parts = [t('undo.done', { count: run.done.length })];
+    if (run.failed.length) parts.push(t('undo.failed', { count: run.failed.length }));
+    el.refollowStatus.textContent = parts.join(' ');
+  } catch (err) {
+    el.refollowStatus.textContent = t('confirm.error', { message: err instanceof Error ? err.message : String(err) });
+  } finally {
+    state.busyWriting = false;
+    renderAll();
+  }
+}
+
+function renderUnfollowed(): void {
+  const entries = Object.entries(state.unfollowed).sort(([, a], [, b]) => b.at.localeCompare(a.at));
+  el.unfollowedBox.hidden = !state.session || entries.length === 0;
+  if (el.unfollowedBox.hidden) return;
+  el.unfollowedCount.textContent = String(entries.length);
+  el.refollowAll.textContent = t('unfollowed.all', { count: entries.length });
+  el.refollowAll.disabled = state.busyWriting;
+  el.unfollowedList.replaceChildren(
+    ...entries.map(([did, { account: a, at }]) => {
+      const name = a.displayName?.trim() || a.handle;
+      return h(
+        'li',
+        { class: 'account' },
+        a.avatar
+          ? h('img', { class: 'avatar', src: a.avatar, alt: '', loading: 'lazy', decoding: 'async', referrerpolicy: 'no-referrer' })
+          : h('span', { class: 'avatar', 'aria-hidden': 'true' }, initials(a)),
+        h(
+          'span',
+          { class: 'who' },
+          h('a', { href: profileHref(a), target: '_blank', rel: 'noopener noreferrer' }, name),
+          h('span', { class: 'handle' }, `@${a.handle}`),
+          h('span', { class: 'when' }, t('unfollowed.at', { date: formatDate(at) })),
+        ),
+        Object.assign(h('button', { type: 'button', class: 'db-btn db-btn-sm cast press', 'data-did': did }, t('unfollowed.one')), {
+          disabled: state.busyWriting,
+        }),
+      );
+    }),
+  );
 }
 
 async function runUndo(): Promise<void> {
@@ -625,10 +785,13 @@ async function runUndo(): Promise<void> {
   const run = await runBatches({ owner: session.sub, repo: sessionRepo(session), batches, onProgress });
   for (const did of run.done) {
     state.undo.delete(did);
+    delete state.unfollowed[did];
     const a = state.undoAccounts.get(did);
     if (a) state.accounts.push(a);
     state.undoAccounts.delete(did);
   }
+  void saveUnfollowed(session.sub, state.unfollowed);
+  persistList();
   const note: StatusKey[] = [{ key: 'undo.done', params: { count: run.done.length } }];
   if (run.failed.length) note.push({ key: 'undo.failed', params: { count: run.failed.length } });
   state.undoNote = note;
@@ -694,6 +857,7 @@ async function onSession(session: OAuthSession): Promise<void> {
     state.sessionProfile = null;
   }
   if (!el.actor.value) el.actor.value = state.sessionProfile?.handle || session.sub;
+  state.unfollowed = await loadUnfollowed(session.sub);
   renderAll();
 }
 
@@ -744,7 +908,7 @@ async function signOut(): Promise<void> {
   if (!session || oauth.kind === 'none') return;
   const { signOut: end } = await import('./lib/oauth');
   await end(oauth, session).catch(() => {});
-  Object.assign(state, { session: null, sessionProfile: null, owned: false, undoNote: null });
+  Object.assign(state, { session: null, sessionProfile: null, owned: false, undoNote: null, unfollowed: {} });
   state.undo.clear();
   state.undoAccounts.clear();
   state.selection.clear();
@@ -762,20 +926,34 @@ el.stop.addEventListener('click', () => state.abort?.abort());
 el.actor.addEventListener('input', () => renderStatus());
 for (const control of [el.minDays, el.replies, el.reposts]) {
   control.addEventListener('change', () => {
-    state.shown = PAGE;
+    state.page = 0;
     renderResults();
   });
 }
 el.search.addEventListener(
   'input',
   debounce(() => {
-    state.shown = PAGE;
+    state.page = 0;
     renderResults();
   }, 120),
 );
-el.more.addEventListener('click', () => {
-  state.shown += PAGE;
+el.perPage.addEventListener('change', () => {
+  state.perPage = Number(el.perPage.value);
+  state.page = 0;
   renderResults();
+});
+el.prevPage.addEventListener('click', () => turnPage(-1));
+el.nextPage.addEventListener('click', () => turnPage(1));
+el.clearSaved.addEventListener('click', () => {
+  void clearList();
+  Object.assign(state, { subject: null, accounts: [], savedAt: null, owned: false });
+  state.selection.clear();
+  renderAll();
+});
+el.refollowAll.addEventListener('click', () => void refollow(Object.keys(state.unfollowed)));
+el.unfollowedList.addEventListener('click', (e) => {
+  const button = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-did]');
+  if (button) void refollow([button.dataset.did!]);
 });
 el.list.addEventListener('change', (e) => {
   const box = e.target;
@@ -864,7 +1042,7 @@ el.replies.checked = DEFAULT_COUNT_RULES.replies;
 el.reposts.checked = DEFAULT_COUNT_RULES.reposts;
 el.minDays.value = String(DEFAULT_MIN_DAYS);
 applyStatic();
-void loadSession();
+void loadSession().then(restoreList);
 
 if (import.meta.env.DEV) {
   void import('./dev/fixtures').then((m) => m.install({ state, renderAll, openConfirm, showWait }));
