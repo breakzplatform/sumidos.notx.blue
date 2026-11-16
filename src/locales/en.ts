@@ -29,8 +29,9 @@ export const en: Messages = {
   'rules.replies': 'Count replies',
   'rules.reposts': 'Count reposts',
 
-  'auth.title': 'Sign in',
-  'auth.pitch': 'To unfollow accounts on your own list, sign in. The permission only covers following and unfollowing.',
+  'auth.title': 'How do you want to use it?',
+  'auth.pitch':
+    'Sign in to unfollow the accounts that went quiet on your list, or continue without signing in to check any public account.',
   'auth.atmosphere': 'Works with Bluesky and any AT Protocol (Atmosphere) server.',
   'auth.signIn': 'Sign in with Bluesky',
   'auth.signInOther': 'Sign in with another Atmosphere account',
@@ -40,6 +41,9 @@ export const en: Messages = {
   'auth.explain':
     'We look up the server (PDS) behind your handle and send you there to sign in. Your password never touches this site.',
   'auth.needHandle': 'Enter your handle.',
+  'auth.skip': 'Continue without signing in',
+  'auth.anonymous': 'Not signed in.',
+  'auth.backToSignIn': 'Sign in to unfollow',
   'auth.signOut': 'Sign out',
   'auth.unavailable': 'Sign-in does not work on this address.',
   'auth.redirecting': 'Opening your server…',
@@ -133,8 +137,25 @@ export const en: Messages = {
   'undo.running': 'Following again… {done} of {total}',
   'undo.done': { one: 'Done: {count} account followed again.', other: 'Done: {count} accounts followed again.' },
 
-  'note.deactivated':
+  'faq.title': 'Questions',
+  'faq.login.q': 'Do I need to sign in?',
+  'faq.login.a':
+    'No. Without signing in you can check the public list of who any account follows. Signing in is only needed to unfollow accounts on your own list.',
+  'faq.quiet.q': 'What counts as gone quiet?',
+  'faq.quiet.a':
+    "The date of the account's last activity. Replies and reposts count when those options are checked. Anyone past the chosen period shows up on the list.",
+  'faq.data.q': 'Does my data go to a server?',
+  'faq.data.a':
+    "No. The lookup runs in your browser, straight against Bluesky's public API. When you sign in, you do it on your own server and your password never passes through this site. The permission only covers following and unfollowing.",
+  'faq.undo.q': 'Can I undo it?',
+  'faq.undo.a':
+    'Yes. After unfollowing, Undo follows the same accounts again, with the original date, while this tab stays open.',
+  'faq.deactivated.q': "Why doesn't a deactivated account show up?",
+  'faq.deactivated.a':
     'A deactivated account drops out of the public list of who someone follows. It only shows up when you sign in and look at your own list.',
+  'faq.slow.q': 'Why does it take a while?',
+  'faq.slow.a':
+    "It's one request per followed account. When Bluesky asks to slow down, the site waits and resumes on its own. Stop keeps what has arrived, and Continue picks up where it stopped.",
 
   'footer.status': 'Work in progress. Expect bugs',
   'footer.bug': 'found one?',

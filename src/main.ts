@@ -32,6 +32,7 @@ import { cycleTheme, getTheme, nextTheme, onRemoteThemeChange, type Theme } from
 
 const PAGE = 200;
 const LANG_KEY = 'lang';
+const ANONYMOUS_KEY = 'sumidos.anonymous';
 const BUG_FORM = { en: 'https://q.joseli.to/forms/notx-blue-bugs', 'pt-BR': 'https://q.joseli.to/forms/notx-blue-bugs-pt' };
 
 const storage = safeStorage();
@@ -78,6 +79,10 @@ const state = {
   undoAccounts: new Map<string, Account>(),
   undoNote: null as StatusKey[] | null,
   busyWriting: false,
+  /** Chose to go on without signing in; lasts for this tab. */
+  anonymous: readAnonymous(),
+  /** A saved session is being restored, so the setup choice is not shown yet. */
+  restoring: false,
 };
 
 const el = {
@@ -114,6 +119,10 @@ const el = {
   undoProgress: byId<HTMLProgressElement>('undo-bar-progress'),
   undo: byId<HTMLButtonElement>('undo'),
   accountBox: byId('account-box'),
+  lookup: byId('lookup'),
+  skipSignIn: byId<HTMLButtonElement>('skip-sign-in'),
+  anonLine: byId('anon-line'),
+  backToSignIn: byId<HTMLButtonElement>('back-to-sign-in'),
   authIn: byId('auth-in'),
   authAvatar: byId<HTMLImageElement>('auth-avatar'),
   authAvatarPlaceholder: byId('auth-avatar-placeholder'),
@@ -247,8 +256,12 @@ const AVATAR_CDN = 'https://cdn.bsky.app/';
 
 function renderAuth(): void {
   const session = state.session;
+  const canSignIn = oauth.kind !== 'none';
+  const chosen = !canSignIn || Boolean(session) || state.anonymous;
   el.privacy.textContent = t(session ? 'privacy.session' : 'privacy.public');
-  el.accountBox.hidden = oauth.kind === 'none' || Boolean(session);
+  el.accountBox.hidden = chosen || state.restoring;
+  el.lookup.hidden = !chosen;
+  el.anonLine.hidden = !canSignIn || Boolean(session) || !state.anonymous;
   el.authIn.hidden = !session;
   if (!session) return;
   const profile = state.sessionProfile;
@@ -638,13 +651,37 @@ async function loadSession(): Promise<void> {
   const leftover = storage?.getItem('@@atproto/oauth-client-browser(sub)');
   // Only download the OAuth code when there is something to do with it.
   if (!hasCallback && !tabSession && !leftover) return;
+  state.restoring = hasCallback || tabSession;
+  renderAuth();
   try {
     const { initSession } = await import('./lib/oauth');
     const session = await initSession(oauth);
     if (session) await onSession(session);
   } catch (err) {
     setAuthError('auth.failed', { message: err instanceof Error ? err.message : String(err) });
+  } finally {
+    state.restoring = false;
+    renderAuth();
   }
+}
+
+function readAnonymous(): boolean {
+  try {
+    return sessionStorage.getItem(ANONYMOUS_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function setAnonymous(anonymous: boolean): void {
+  state.anonymous = anonymous;
+  try {
+    if (anonymous) sessionStorage.setItem(ANONYMOUS_KEY, '1');
+    else sessionStorage.removeItem(ANONYMOUS_KEY);
+  } catch {
+    // The choice lasts for this page view.
+  }
+  renderAuth();
 }
 
 async function onSession(session: OAuthSession): Promise<void> {
@@ -788,6 +825,14 @@ window.addEventListener('pageshow', (e) => {
   if (e.persisted) setSignInBusy(false);
 });
 el.signOut.addEventListener('click', () => void signOut());
+el.skipSignIn.addEventListener('click', () => {
+  setAnonymous(true);
+  el.actor.focus();
+});
+el.backToSignIn.addEventListener('click', () => {
+  setAnonymous(false);
+  el.bskySignIn.focus();
+});
 el.language.addEventListener('click', () => {
   const next: Locale = i18n.locale === 'en' ? 'pt-BR' : 'en';
   i18n.setLocale(next);
@@ -809,7 +854,11 @@ onRemoteThemeChange(syncTheme);
 
 // ?handle= only fills the field; it never starts a lookup by itself.
 const fromUrl = new URLSearchParams(location.search).get('handle');
-if (fromUrl) el.actor.value = fromUrl;
+// A shared link asks for a public lookup, so it skips the setup choice.
+if (fromUrl) {
+  el.actor.value = fromUrl;
+  state.anonymous = true;
+}
 el.replies.checked = DEFAULT_COUNT_RULES.replies;
 el.reposts.checked = DEFAULT_COUNT_RULES.reposts;
 el.minDays.value = String(DEFAULT_MIN_DAYS);

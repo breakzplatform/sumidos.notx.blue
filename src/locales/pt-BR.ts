@@ -29,9 +29,9 @@ export const ptBR: Messages = {
   'rules.replies': 'Contar respostas',
   'rules.reposts': 'Contar reposts',
 
-  'auth.title': 'Entrar',
+  'auth.title': 'Como você quer usar?',
   'auth.pitch':
-    'Para deixar de seguir contas da sua própria lista, entre com a sua conta. A permissão cobre só seguir e deixar de seguir.',
+    'Entre com a sua conta para deixar de seguir quem sumiu da sua lista, ou continue sem login para consultar qualquer conta pública.',
   'auth.atmosphere': 'Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).',
   'auth.signIn': 'Entrar com o Bluesky',
   'auth.signInOther': 'Entrar com outra conta da Atmosphere',
@@ -41,6 +41,9 @@ export const ptBR: Messages = {
   'auth.explain':
     'Buscamos o servidor (PDS) do seu handle e levamos você até ele para entrar. Sua senha nunca passa por este site.',
   'auth.needHandle': 'Informe o handle.',
+  'auth.skip': 'Continuar sem login',
+  'auth.anonymous': 'Sem login.',
+  'auth.backToSignIn': 'Entrar para deixar de seguir',
   'auth.signOut': 'Sair',
   'auth.unavailable': 'O login não funciona neste endereço.',
   'auth.redirecting': 'Abrindo o seu servidor…',
@@ -137,8 +140,25 @@ export const ptBR: Messages = {
   'undo.running': 'Voltando a seguir… {done} de {total}',
   'undo.done': { one: 'Pronto: {count} conta seguida de novo.', other: 'Pronto: {count} contas seguidas de novo.' },
 
-  'note.deactivated':
+  'faq.title': 'Perguntas frequentes',
+  'faq.login.q': 'Preciso entrar com a minha conta?',
+  'faq.login.a':
+    'Não. Sem login dá para consultar a lista pública de quem qualquer conta segue. O login só serve para deixar de seguir contas da sua própria lista.',
+  'faq.quiet.q': 'O que conta como parar de postar?',
+  'faq.quiet.a':
+    'A data da última atividade da conta. Respostas e reposts contam se as opções estiverem marcadas. Quem passou do período escolhido aparece na lista.',
+  'faq.data.q': 'Meus dados vão para algum servidor?',
+  'faq.data.a':
+    'Não. A consulta roda no seu navegador, direto na API pública do Bluesky. No login, você entra pelo seu próprio servidor e a senha nunca passa por este site. A permissão cobre só seguir e deixar de seguir.',
+  'faq.undo.q': 'Dá para desfazer?',
+  'faq.undo.a':
+    'Sim. Depois de deixar de seguir, Desfazer volta a seguir as mesmas contas, com a data original, enquanto esta aba estiver aberta.',
+  'faq.deactivated.q': 'Por que uma conta desativada não aparece?',
+  'faq.deactivated.a':
     'Conta desativada some da lista pública de quem a pessoa segue. Ela só aparece quando você entra e vê a sua própria lista.',
+  'faq.slow.q': 'Por que demora?',
+  'faq.slow.a':
+    'É uma consulta por conta seguida. Quando o Bluesky pede para ir mais devagar, o site espera e retoma sozinho. Parar guarda o que já veio, e Continuar retoma de onde parou.',
 
   'footer.status': 'Em construção. Espere bugs',
   'footer.bug': 'achou um?',

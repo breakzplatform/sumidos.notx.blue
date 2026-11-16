@@ -29,11 +29,57 @@
       </header>
 
       <main id="conteudo" tabindex="-1">
-        <p class="privacy-line" id="privacy-line" data-i18n="privacy.public">
-          A consulta roda no seu navegador. Nada é guardado nem enviado para servidores nossos.
-        </p>
+        <section class="cast" id="account-box" aria-labelledby="signin-title" hidden>
+          <h1 class="db-panel-head" id="signin-title"><span data-i18n="auth.title">Como você quer usar?</span></h1>
+          <div class="signin-body">
+            <p class="lede" data-i18n="auth.pitch">
+              Entre com a sua conta para deixar de seguir quem sumiu da sua lista, ou continue sem login para consultar qualquer conta pública.
+            </p>
+            <p class="signin-atmosphere"><strong data-i18n="auth.atmosphere">Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).</strong></p>
+            <div class="signin-choices">
+              <button id="bsky-sign-in" type="button" class="db-btn db-btn-primary cast press" data-i18n="auth.signIn">Entrar com o Bluesky</button>
+              <button
+                id="other-sign-in"
+                type="button"
+                class="db-btn cast press"
+                aria-expanded="false"
+                aria-controls="handle-form"
+                data-i18n="auth.signInOther"
+              >
+                Entrar com outra conta da Atmosphere
+              </button>
+            </div>
+            <form id="handle-form" class="signin-form" novalidate hidden>
+              <label for="handle" data-i18n="auth.handleLabel">Seu handle ou servidor</label>
+              <div class="signin-input-row">
+                <span class="db-field"
+                  ><input
+                    id="handle"
+                    class="db-input"
+                    name="handle"
+                    type="text"
+                    inputmode="url"
+                    autocomplete="username"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    placeholder="voce.exemplo.com ou https://pds.exemplo.com"
+                    data-i18n-placeholder="auth.handleHint"
+                    aria-describedby="handle-note"
+                /></span>
+                <button type="submit" class="db-btn db-btn-primary cast press" data-i18n="auth.continue">Continuar</button>
+              </div>
+              <p class="db-note" id="handle-note" data-i18n="auth.explain">
+                Buscamos o servidor (PDS) do seu handle e levamos você até ele para entrar. Sua senha nunca passa por este site.
+              </p>
+              <p class="db-note auth-error" id="handle-error" role="alert" hidden></p>
+            </form>
+            <button id="skip-sign-in" type="button" class="db-btn cast press signin-skip" data-i18n="auth.skip">Continuar sem login</button>
+            <p class="db-note signin-status" id="signin-status"></p>
+            <p id="auth-error" class="auth-error" role="alert" hidden></p>
+          </div>
+        </section>
 
-        <section class="cast" aria-labelledby="search-title">
+        <section class="cast" id="lookup" aria-labelledby="search-title" hidden>
           <h1 class="db-panel-head" id="search-title"><span data-i18n="search.title">Quem parou de postar</span></h1>
           <div class="panel-body stack">
             <div id="auth-in" class="profile" hidden>
@@ -84,55 +130,13 @@
               <p class="db-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
             </form>
             <p class="status-line" id="status" role="status" data-i18n="status.idle">Digite um @ e clique em Verificar.</p>
-          </div>
-        </section>
-
-        <section class="cast" id="account-box" aria-labelledby="signin-title" hidden>
-          <h2 class="db-panel-head" id="signin-title"><span data-i18n="auth.title">Entrar</span></h2>
-          <div class="signin-body">
-            <p class="lede" data-i18n="auth.pitch">
-              Para deixar de seguir contas da sua própria lista, entre com a sua conta. A permissão cobre só seguir e deixar de seguir.
+            <p class="db-note" id="privacy-line" data-i18n="privacy.public">
+              A consulta roda no seu navegador. Nada é guardado nem enviado para servidores nossos.
             </p>
-            <p class="signin-atmosphere"><strong data-i18n="auth.atmosphere">Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).</strong></p>
-            <div class="signin-choices">
-              <button id="bsky-sign-in" type="button" class="db-btn db-btn-primary cast press" data-i18n="auth.signIn">Entrar com o Bluesky</button>
-              <button
-                id="other-sign-in"
-                type="button"
-                class="db-btn cast press"
-                aria-expanded="false"
-                aria-controls="handle-form"
-                data-i18n="auth.signInOther"
-              >
-                Entrar com outra conta da Atmosphere
-              </button>
-            </div>
-            <form id="handle-form" class="signin-form" novalidate hidden>
-              <label for="handle" data-i18n="auth.handleLabel">Seu handle ou servidor</label>
-              <div class="signin-input-row">
-                <span class="db-field"
-                  ><input
-                    id="handle"
-                    class="db-input"
-                    name="handle"
-                    type="text"
-                    inputmode="url"
-                    autocomplete="username"
-                    autocapitalize="off"
-                    spellcheck="false"
-                    placeholder="voce.exemplo.com ou https://pds.exemplo.com"
-                    data-i18n-placeholder="auth.handleHint"
-                    aria-describedby="handle-note"
-                /></span>
-                <button type="submit" class="db-btn db-btn-primary cast press" data-i18n="auth.continue">Continuar</button>
-              </div>
-              <p class="db-note" id="handle-note" data-i18n="auth.explain">
-                Buscamos o servidor (PDS) do seu handle e levamos você até ele para entrar. Sua senha nunca passa por este site.
-              </p>
-              <p class="db-note auth-error" id="handle-error" role="alert" hidden></p>
-            </form>
-            <p class="db-note signin-status" id="signin-status"></p>
-            <p id="auth-error" class="auth-error" role="alert" hidden></p>
+            <p class="db-note" id="anon-line" hidden>
+              <span data-i18n="auth.anonymous">Sem login.</span>
+              <button id="back-to-sign-in" type="button" class="link-button" data-i18n="auth.backToSignIn">Entrar para deixar de seguir</button>
+            </p>
           </div>
         </section>
 
@@ -183,9 +187,35 @@
           </div>
         </section>
 
-        <p class="db-note" id="note" data-i18n="note.deactivated">
-          Conta desativada some da lista pública de quem a pessoa segue. Só aparece quando você entra e vê a sua própria lista.
-        </p>
+        <section class="cast" id="faq" aria-labelledby="faq-title">
+          <h2 class="db-panel-head" id="faq-title"><span data-i18n="faq.title">Perguntas frequentes</span></h2>
+          <div class="panel-body faq">
+            <details>
+              <summary data-i18n="faq.login.q">Preciso entrar com a minha conta?</summary>
+              <p data-i18n="faq.login.a">Não. Sem login dá para consultar a lista pública de quem qualquer conta segue. O login só serve para deixar de seguir contas da sua própria lista.</p>
+            </details>
+            <details>
+              <summary data-i18n="faq.quiet.q">O que conta como parar de postar?</summary>
+              <p data-i18n="faq.quiet.a">A data da última atividade da conta. Respostas e reposts contam se as opções estiverem marcadas. Quem passou do período escolhido aparece na lista.</p>
+            </details>
+            <details>
+              <summary data-i18n="faq.data.q">Meus dados vão para algum servidor?</summary>
+              <p data-i18n="faq.data.a">Não. A consulta roda no seu navegador, direto na API pública do Bluesky. No login, você entra pelo seu próprio servidor e a senha nunca passa por este site. A permissão cobre só seguir e deixar de seguir.</p>
+            </details>
+            <details>
+              <summary data-i18n="faq.undo.q">Dá para desfazer?</summary>
+              <p data-i18n="faq.undo.a">Sim. Depois de deixar de seguir, Desfazer volta a seguir as mesmas contas, com a data original, enquanto esta aba estiver aberta.</p>
+            </details>
+            <details>
+              <summary data-i18n="faq.deactivated.q">Por que uma conta desativada não aparece?</summary>
+              <p data-i18n="faq.deactivated.a">Conta desativada some da lista pública de quem a pessoa segue. Ela só aparece quando você entra e vê a sua própria lista.</p>
+            </details>
+            <details>
+              <summary data-i18n="faq.slow.q">Por que demora?</summary>
+              <p data-i18n="faq.slow.a">É uma consulta por conta seguida. Quando o Bluesky pede para ir mais devagar, o site espera e retoma sozinho. Parar guarda o que já veio, e Continuar retoma de onde parou.</p>
+            </details>
+          </div>
+        </section>
       </main>
 
       <footer>
@@ -196,10 +226,6 @@
             ><span data-i18n="footer.partOf">parte do</span> <a href="https://notx.blue">notx.blue</a>
             <span data-i18n="footer.by">por</span> <a href="https://bsky.app/profile/joseli.to">@joseli.to</a></span
           >
-          <span><a href="https://github.com/breakzplatform/crickets.notx.blue" data-i18n="footer.source">ver código</a></span>
-          <span><a href="https://notx.blue/privacy" data-i18n="footer.privacy">Privacidade</a></span>
-          <span><a href="https://status.joseli.to/" target="_blank" rel="noopener">status</a></span>
-          <span><a href="mailto:abuse@notx.blue">abuse@notx.blue</a></span>
         </p>
         <p class="db-note center" data-i18n="footer.fromBrazil">
           Direto do Brasil pelo Joselito, com muito carinho. Este site não usa cookies nem analytics. Idioma e tema ficam neste navegador. Não tem relação com o Bluesky.
@@ -211,6 +237,12 @@
           <a class="chip chip-coffee cast press" href="https://buymeacoffee.com/joselito" target="_blank" rel="noopener">Buy Me a Coffee</a>
           <a class="chip chip-sponsors cast press" href="https://github.com/sponsors/breakzplatform" target="_blank" rel="noopener">GitHub Sponsors</a>
         </div>
+        <p class="db-meta foot">
+          <span><a href="https://github.com/breakzplatform/crickets.notx.blue" data-i18n="footer.source">ver código</a></span>
+          <span><a href="https://notx.blue/privacy" data-i18n="footer.privacy">Privacidade</a></span>
+          <span><a href="https://status.joseli.to/" target="_blank" rel="noopener">status</a></span>
+          <span><a href="mailto:abuse@notx.blue">abuse@notx.blue</a></span>
+        </p>
       </footer>
     </div>
 

@@ -181,14 +181,6 @@ section.cast {
   padding: var(--box-pad);
 }
 
-.privacy-line {
-  margin: 0 0 var(--space-8);
-  padding: var(--space-4) var(--space-5);
-  border-left: 6px solid var(--project-ink);
-  background: var(--surface-card);
-  color: var(--text-2);
-  font: var(--type-dek);
-}
 .lede {
   margin: 0;
   color: var(--text-2);
@@ -374,6 +366,20 @@ section.cast {
 }
 .signin-input-row .db-input {
   height: 56px;
+}
+.signin-skip {
+  width: 100%;
+  min-height: 56px;
+  font-size: var(--text-body);
+}
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--link, inherit);
+  text-decoration: underline;
+  cursor: pointer;
 }
 .signin-status:empty {
   display: none;
@@ -682,11 +688,13 @@ dialog::backdrop {
 
 /* ---------------------------------------------------------------- footer */
 
+/* Same rhythm as the notx.blue footer: 24px between its lines. */
 footer {
   margin-top: var(--space-10);
 }
-footer p {
-  margin: 0 0 var(--space-6);
+footer > *,
+footer > .db-note {
+  margin: 0 0 var(--space-8);
 }
 .foot {
   display: flex;
@@ -744,4 +752,20 @@ a.chip-sponsors:visited,
 a.chip-sponsors:hover {
   background: var(--ink-sponsors);
   color: var(--on-sponsors);
+}
+
+/* ---------------------------------------------------------------- faq */
+
+.faq {
+  display: grid;
+  gap: var(--space-6);
+}
+.faq summary {
+  cursor: pointer;
+  font-weight: var(--weight-bold);
+  color: var(--text-1);
+}
+.faq details p {
+  margin: var(--space-4) 0 0;
+  color: var(--text-2);
 }
