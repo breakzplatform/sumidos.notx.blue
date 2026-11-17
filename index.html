@@ -13,54 +13,54 @@
   </head>
   <body>
     <a class="skip" href="#conteudo" data-i18n="skip">Ir para o conteúdo</a>
-    <div class="page">
+    <div class="notx-page">
       <header>
-        <div class="tools">
-          <button id="language" type="button" class="db-btn db-btn-sm cast press" lang="en">english</button>
-          <button id="theme" type="button" class="db-btn db-btn-sm cast press theme-switch">
+        <div class="flex flex-wrap items-center justify-end gap-2 pt-4">
+          <button id="language" type="button" class="notx-btn notx-btn-sm cast press" lang="en">english</button>
+          <button id="theme" type="button" class="notx-btn notx-btn-sm cast press theme-switch">
             <svg class="icon icon-sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
             <svg class="icon icon-moon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true" focusable="false"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>
             <svg class="icon icon-terminal" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true" focusable="false"><path d="M12 19h8"></path><path d="m4 17 6-6-6-6"></path></svg>
             <span id="theme-label">escuro</span>
           </button>
         </div>
-        <div class="db-wordmark">
+        <div class="notx-wordmark">
           <a href="/" id="wordmark" aria-label="sumidos.notx.blue"
-            ><span class="ink-block tilt-cw" id="wordmark-name">sumidos</span><span class="wordmark-suffix">.notx.blue</span></a
+            ><span class="ink-block tilt-cw" id="wordmark-name">sumidos</span><span class="notx-wordmark-suffix">.notx.blue</span></a
           >
         </div>
       </header>
 
       <main id="conteudo" tabindex="-1">
-        <section class="cast" aria-labelledby="search-title">
-          <h1 class="db-panel-head" id="search-title"><span data-i18n="search.title">Quem parou de postar?</span></h1>
-          <div class="panel-body stack">
+        <section class="cast notx-panel" aria-labelledby="search-title">
+          <h1 class="notx-panel-head" id="search-title"><span data-i18n="search.title">Quem parou de postar?</span></h1>
+          <div class="flex flex-col gap-3.5 p-4 *:min-w-0">
             <div class="signin-body" id="account-box" hidden>
-              <p class="lede" data-i18n="auth.pitch">
+              <p class="m-0 text-text-2" data-i18n="auth.pitch">
                 Entre com a sua conta para deixar de seguir quem sumiu da skyline, ou continue sem login para consultar qualquer conta pública.
               </p>
               <p class="signin-atmosphere"><strong data-i18n="auth.atmosphere">Funciona com o Bluesky e com qualquer servidor do AT Protocol (Atmosphere).</strong></p>
               <div class="signin-choices">
-                <button id="bsky-sign-in" type="button" class="db-btn db-btn-primary cast press" data-i18n="auth.signIn">Entrar com o Bluesky</button>
+                <button id="bsky-sign-in" type="button" class="notx-btn notx-btn-primary cast press" data-i18n="auth.signIn">Entrar com o Bluesky</button>
                 <button
                   id="other-sign-in"
                   type="button"
-                  class="db-btn cast press"
+                  class="notx-btn cast press"
                   aria-expanded="false"
                   aria-controls="handle-form"
                   data-i18n="auth.signInOther"
                 >
                   Entrar com o ATProto
                 </button>
-                <button id="skip-sign-in" type="button" class="db-btn cast press" data-i18n="auth.skip">Continuar sem login</button>
+                <button id="skip-sign-in" type="button" class="notx-btn cast press" data-i18n="auth.skip">Continuar sem login</button>
               </div>
               <form id="handle-form" class="signin-form" novalidate hidden>
                 <label for="handle" data-i18n="auth.handleLabel">Sua conta ou servidor</label>
                 <div class="signin-input-row">
-                  <span class="db-field"
+                  <span class="notx-field"
                     ><input
                       id="handle"
-                      class="db-input"
+                      class="notx-input"
                       name="handle"
                       type="text"
                       inputmode="url"
@@ -71,20 +71,20 @@
                       data-i18n-placeholder="auth.handleHint"
                       aria-describedby="handle-note"
                   /></span>
-                  <button type="submit" class="db-btn db-btn-primary cast press" data-i18n="auth.continue">Continuar</button>
+                  <button type="submit" class="notx-btn notx-btn-primary cast press" data-i18n="auth.continue">Continuar</button>
                 </div>
-                <p class="db-note" id="handle-note" data-i18n="auth.explain">
+                <p class="notx-note" id="handle-note" data-i18n="auth.explain">
                   Buscamos o servidor (PDS) da sua arroba e levamos você até ele para entrar. Sua senha nunca passa por este site.
                 </p>
-                <p class="db-note auth-error" id="handle-error" role="alert" hidden></p>
+                <p class="notx-note auth-error" id="handle-error" role="alert" hidden></p>
               </form>
-              <p class="db-note signin-status" id="signin-status"></p>
+              <p class="notx-note signin-status" id="signin-status"></p>
               <p id="auth-error" class="auth-error" role="alert" hidden></p>
             </div>
-            <div id="lookup" class="stack">
+            <div id="lookup" class="flex flex-col gap-3.5 *:min-w-0">
               <div id="anon-line" class="anon-box" hidden>
                 <p data-i18n="auth.anonymous">Sem login: dá para consultar qualquer conta. Para deixar de seguir, entre com a sua.</p>
-                <button id="back-to-sign-in" type="button" class="db-btn db-btn-primary cast press" data-i18n="auth.backToSignIn">Entrar</button>
+                <button id="back-to-sign-in" type="button" class="notx-btn notx-btn-primary cast press" data-i18n="auth.backToSignIn">Entrar</button>
               </div>
               <div id="auth-in" class="profile" hidden>
                 <img id="auth-avatar" class="avatar" alt="" width="40" height="40" hidden />
@@ -93,17 +93,17 @@
                   <p class="name" id="auth-name"></p>
                   <p class="handle" id="auth-handle"></p>
                 </div>
-                <button id="sign-out" type="button" class="db-btn cast press" data-i18n="auth.signOut">Sair</button>
+                <button id="sign-out" type="button" class="notx-btn cast press" data-i18n="auth.signOut">Sair</button>
               </div>
-              <form id="search-form" class="stack" novalidate>
-                <p class="lede"><span data-i18n="search.lede">Descubra quem uma conta do Bluesky segue e parou de postar.</span> <span id="privacy-line">A consulta roda no seu navegador. Nada é enviado para servidores nossos, e a última lista fica salva só neste navegador.</span></p>
-                <div class="field">
+              <form id="search-form" class="flex flex-col gap-3.5 *:min-w-0" novalidate>
+                <p class="m-0 text-text-2"><span data-i18n="search.lede">Descubra quem uma conta do Bluesky segue e parou de postar.</span> <span id="privacy-line">A consulta roda no seu navegador. Nada é enviado para servidores nossos, e a última lista fica salva só neste navegador.</span></p>
+                <div class="flex flex-col gap-1.5 font-bold">
                   <label for="actor" data-i18n="search.label">Conta no Bluesky</label>
                   <div class="row-input">
-                    <span class="db-field"
+                    <span class="notx-field"
                       ><input
                         id="actor"
-                        class="db-input"
+                        class="notx-input"
                         name="actor"
                         type="text"
                         inputmode="email"
@@ -113,15 +113,15 @@
                         placeholder="voce.bsky.social"
                         data-i18n-placeholder="search.placeholder"
                     /></span>
-                    <button id="run" type="submit" class="db-btn db-btn-primary cast press" data-i18n="search.run">Verificar</button>
-                    <button id="stop" type="button" class="db-btn cast press" disabled data-i18n="search.stop">Parar</button>
+                    <button id="run" type="submit" class="notx-btn notx-btn-primary cast press" data-i18n="search.run">Verificar</button>
+                    <button id="stop" type="button" class="notx-btn cast press" disabled data-i18n="search.stop">Parar</button>
                   </div>
                 </div>
                 <fieldset class="options">
-                  <legend class="sr" data-i18n="rules.legend">O que conta como atividade</legend>
+                  <legend class="sr-only" data-i18n="rules.legend">O que conta como atividade</legend>
                   <label class="min-days"
                     ><span data-i18n="rules.minDays">Sem postar há mais de</span>
-                    <select id="min-days" class="db-select">
+                    <select id="min-days" class="select-box">
                       <option value="30">30</option>
                       <option value="90" selected>90</option>
                       <option value="180">180</option>
@@ -131,19 +131,19 @@
                   <label><input id="count-replies" type="checkbox" checked /> <span data-i18n="rules.replies">Contar respostas</span></label>
                   <label><input id="count-reposts" type="checkbox" /> <span data-i18n="rules.reposts">Contar reposts</span></label>
                 </fieldset>
-                <p class="db-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
+                <p class="notx-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
               </form>
               <p class="status-line" id="status" role="status" data-i18n="status.idle">Digite uma conta e clique em Verificar.</p>
             </div>
           </div>
         </section>
 
-        <section class="cast" id="progress" aria-labelledby="progress-title" hidden>
-          <h2 class="db-panel-head" id="progress-title">
-            <span data-i18n="progress.title">Lendo</span><span class="db-panel-status" id="progress-count"></span>
+        <section class="cast notx-panel" id="progress" aria-labelledby="progress-title" hidden>
+          <h2 class="notx-panel-head" id="progress-title">
+            <span data-i18n="progress.title">Lendo</span><span class="flex-none whitespace-nowrap" id="progress-count"></span>
           </h2>
-          <div class="panel-body stack">
-            <p class="phase" id="progress-phase"></p>
+          <div class="flex flex-col gap-3.5 p-4 *:min-w-0">
+            <p class="m-0 font-bold" id="progress-phase"></p>
             <progress id="progress-bar" max="1" value="0"></progress>
             <div id="large-list" class="db-callout callout-warn" hidden>
               <span class="db-callout-spine" aria-hidden="true">!</span>
@@ -153,33 +153,33 @@
           </div>
         </section>
 
-        <section class="cast" id="results" aria-labelledby="results-title" hidden>
-          <h2 class="db-panel-head" id="results-title">
-            <span id="results-owner"></span><span class="db-panel-status" id="results-count"></span>
+        <section class="cast notx-panel" id="results" aria-labelledby="results-title" hidden>
+          <h2 class="notx-panel-head" id="results-title">
+            <span id="results-owner"></span><span class="flex-none whitespace-nowrap" id="results-count"></span>
           </h2>
-          <div class="panel-body stack">
-            <div class="field">
+          <div class="flex flex-col gap-3.5 p-4 *:min-w-0">
+            <div class="flex flex-col gap-1.5 font-bold">
               <label for="search" data-i18n="results.search">Nome ou @</label>
-              <span class="db-field"><input id="search" class="db-input" type="search" autocomplete="off" spellcheck="false" /></span>
+              <span class="notx-field"><input id="search" class="notx-input" type="search" autocomplete="off" spellcheck="false" /></span>
             </div>
             <p class="list-note" id="results-note"></p>
-            <div class="saved-note" id="saved-note" hidden>
-              <p class="db-note" id="saved-text"></p>
-              <button id="clear-saved" type="button" class="db-btn db-btn-sm cast press" data-i18n="saved.clear">Apagar lista salva</button>
+            <div class="flex flex-wrap items-center justify-between gap-2" id="saved-note" hidden>
+              <p class="notx-note" id="saved-text"></p>
+              <button id="clear-saved" type="button" class="notx-btn notx-btn-sm cast press" data-i18n="saved.clear">Apagar lista salva</button>
             </div>
-            <div class="results-bar">
-              <p class="db-meta" id="results-meta"></p>
-              <button id="csv" type="button" class="db-btn db-btn-sm cast press" data-i18n="results.csv">Exportar CSV</button>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <p class="notx-meta m-0 flex-[1_1_16rem]" id="results-meta"></p>
+              <button id="csv" type="button" class="notx-btn notx-btn-sm cast press" data-i18n="results.csv">Exportar CSV</button>
             </div>
             <div id="owner-bar" class="owner-bar" hidden>
-              <button id="mark-all" type="button" class="db-btn db-btn-sm cast press"></button>
-              <button id="mark-none" type="button" class="db-btn db-btn-sm cast press" data-i18n="owner.clear">Desmarcar</button>
-              <button id="unfollow" type="button" class="db-btn db-btn-danger cast press" disabled></button>
+              <button id="mark-all" type="button" class="notx-btn notx-btn-sm cast press"></button>
+              <button id="mark-none" type="button" class="notx-btn notx-btn-sm cast press" data-i18n="owner.clear">Desmarcar</button>
+              <button id="unfollow" type="button" class="notx-btn notx-btn-danger cast press" disabled></button>
             </div>
-            <div id="undo-bar" class="banner undo-bar" hidden>
-              <p id="undo-text"></p>
+            <div id="undo-bar" class="banner flex flex-wrap items-center gap-2" hidden>
+              <p id="undo-text" class="m-0 flex-[1_1_16rem]"></p>
               <progress id="undo-bar-progress" max="1" value="0" hidden></progress>
-              <button id="undo" type="button" class="db-btn db-btn-sm cast press" data-i18n="undo.run">Desfazer</button>
+              <button id="undo" type="button" class="notx-btn notx-btn-sm cast press" data-i18n="undo.run">Desfazer</button>
             </div>
           </div>
           <ol class="accounts" id="list"></ol>
@@ -188,37 +188,37 @@
           <nav class="pager" id="pager" aria-label="Páginas" hidden>
             <label class="per-page"
               ><span data-i18n="pager.perPage">Por página</span>
-              <select id="per-page" class="db-select">
+              <select id="per-page" class="select-box">
                 <option value="20" selected>20</option>
                 <option value="40">40</option>
                 <option value="60">60</option>
               </select></label
             >
-            <span class="pager-steps">
-              <button id="prev-page" type="button" class="db-btn db-btn-sm cast press" data-i18n="pager.prev">Anterior</button>
-              <span class="db-meta" id="page-label"></span>
-              <button id="next-page" type="button" class="db-btn db-btn-sm cast press" data-i18n="pager.next">Próxima</button>
+            <span class="inline-flex items-center gap-3.5">
+              <button id="prev-page" type="button" class="notx-btn notx-btn-sm cast press" data-i18n="pager.prev">Anterior</button>
+              <span class="notx-meta" id="page-label"></span>
+              <button id="next-page" type="button" class="notx-btn notx-btn-sm cast press" data-i18n="pager.next">Próxima</button>
             </span>
           </nav>
         </section>
 
-        <section class="cast" id="unfollowed" aria-labelledby="unfollowed-title" hidden>
+        <section class="cast notx-panel" id="unfollowed" aria-labelledby="unfollowed-title" hidden>
 
-          <h2 class="db-panel-head" id="unfollowed-title">
+          <h2 class="notx-panel-head" id="unfollowed-title">
 
-            <span data-i18n="unfollowed.title">Deixou de seguir</span><span class="db-panel-status" id="unfollowed-count"></span>
+            <span data-i18n="unfollowed.title">Deixou de seguir</span><span class="flex-none whitespace-nowrap" id="unfollowed-count"></span>
 
           </h2>
 
-          <div class="panel-body stack">
+          <div class="flex flex-col gap-3.5 p-4 *:min-w-0">
 
-            <p class="db-note" data-i18n="unfollowed.note">Quem você deixou de seguir por aqui fica salvo neste navegador. Seguir de novo volta com a data original.</p>
+            <p class="notx-note" data-i18n="unfollowed.note">Quem você deixou de seguir por aqui fica salvo neste navegador. Seguir de novo volta com a data original.</p>
 
             <div class="owner-bar">
 
-              <button id="refollow-all" type="button" class="db-btn cast press"></button>
+              <button id="refollow-all" type="button" class="notx-btn cast press"></button>
 
-              <p class="db-note" id="refollow-status" role="status"></p>
+              <p class="notx-note" id="refollow-status" role="status"></p>
 
             </div>
 
@@ -229,30 +229,30 @@
         </section>
 
 
-        <section class="cast" id="faq" aria-labelledby="faq-title">
-          <h2 class="db-panel-head" id="faq-title"><span data-i18n="faq.title">Perguntas frequentes</span></h2>
-          <div class="faq-list">
-            <details class="faq-item">
+        <section class="cast notx-panel" id="faq" aria-labelledby="faq-title">
+          <h2 class="notx-panel-head" id="faq-title"><span data-i18n="faq.title">Perguntas frequentes</span></h2>
+          <div class="notx-faq">
+            <details class="notx-faq-item">
               <summary data-i18n="faq.login.q">Preciso entrar com a minha conta?</summary>
               <p data-i18n="faq.login.a">Não. Sem login dá para consultar a lista pública de quem qualquer conta segue. O login só serve para deixar de seguir contas da sua própria lista.</p>
             </details>
-            <details class="faq-item">
+            <details class="notx-faq-item">
               <summary data-i18n="faq.quiet.q">O que conta como parar de postar?</summary>
               <p data-i18n="faq.quiet.a">A data da última atividade da conta. Respostas e reposts contam se as opções estiverem marcadas. Quem passou do período escolhido aparece na lista.</p>
             </details>
-            <details class="faq-item">
+            <details class="notx-faq-item">
               <summary data-i18n="faq.data.q">Meus dados vão para algum servidor?</summary>
               <p data-i18n="faq.data.a">Não. A consulta roda no seu navegador, direto na API pública do Bluesky. A última lista e quem você deixou de seguir ficam salvos só neste navegador. No login, você entra pelo seu próprio servidor e a senha nunca passa por este site. A permissão cobre só seguir e deixar de seguir.</p>
             </details>
-            <details class="faq-item">
+            <details class="notx-faq-item">
               <summary data-i18n="faq.undo.q">Dá para desfazer?</summary>
               <p data-i18n="faq.undo.a">Sim. Depois de deixar de seguir, Desfazer volta a seguir as mesmas contas, com a data original, enquanto esta aba estiver aberta. Depois disso, use o painel Deixou de seguir.</p>
             </details>
-            <details class="faq-item">
+            <details class="notx-faq-item">
               <summary data-i18n="faq.deactivated.q">Por que uma conta desativada não aparece?</summary>
               <p data-i18n="faq.deactivated.a">Conta desativada some da lista pública de quem a pessoa segue. Ela só aparece quando você entra e vê a sua própria lista.</p>
             </details>
-            <details class="faq-item">
+            <details class="notx-faq-item">
               <summary data-i18n="faq.slow.q">Por que demora?</summary>
               <p data-i18n="faq.slow.a">É uma consulta por conta seguida. Quando o Bluesky pede para ir mais devagar, o site espera e retoma sozinho. Parar guarda o que já veio, e Continuar retoma de onde parou.</p>
             </details>
@@ -260,8 +260,8 @@
         </section>
       </main>
 
-      <footer>
-        <p class="db-meta foot">
+      <footer class="notx-footer">
+        <p class="notx-meta notx-foot">
           <span data-i18n="footer.status">Em construção. Espere bugs</span>
           <span><a id="bug" href="https://q.joseli.to/forms/notx-blue-bugs-pt" target="_blank" rel="noopener" data-i18n="footer.bug">achou um?</a></span>
           <span
@@ -269,17 +269,17 @@
             <span data-i18n="footer.by">por</span> <a href="https://bsky.app/profile/joseli.to">@joseli.to</a></span
           >
         </p>
-        <p class="db-note center" data-i18n="footer.fromBrazil">
+        <p class="notx-note text-center" data-i18n="footer.fromBrazil">
           Direto do Brasil pelo Joselito, com muito carinho. Este site não usa cookies nem analytics. Idioma, tema e a última lista ficam neste navegador. Não tem relação com o Bluesky.
         </p>
-        <div class="chips">
-          <span class="db-meta" data-i18n="footer.support">Apoie este projeto:</span>
-          <a class="chip chip-pix cast press" href="https://pix.joseli.to" target="_blank" rel="noopener">Pix</a>
-          <a class="chip chip-mp cast press" href="https://link.mercadopago.com.br/breakzplatform" target="_blank" rel="noopener">Mercado Pago</a>
-          <a class="chip chip-coffee cast press" href="https://buymeacoffee.com/joselito" target="_blank" rel="noopener">Buy Me a Coffee</a>
-          <a class="chip chip-sponsors cast press" href="https://github.com/sponsors/breakzplatform" target="_blank" rel="noopener">GitHub Sponsors</a>
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <span class="notx-meta" data-i18n="footer.support">Apoie este projeto:</span>
+          <a class="notx-chip bg-ink-pix text-on-pix cast press" href="https://pix.joseli.to" target="_blank" rel="noopener">Pix</a>
+          <a class="notx-chip bg-ink-mercadopago text-on-mercadopago cast press" href="https://link.mercadopago.com.br/breakzplatform" target="_blank" rel="noopener">Mercado Pago</a>
+          <a class="notx-chip bg-ink-yellow text-on-yellow cast press" href="https://buymeacoffee.com/joselito" target="_blank" rel="noopener">Buy Me a Coffee</a>
+          <a class="notx-chip bg-ink-sponsors text-on-sponsors cast press" href="https://github.com/sponsors/breakzplatform" target="_blank" rel="noopener">GitHub Sponsors</a>
         </div>
-        <p class="db-meta foot">
+        <p class="notx-meta notx-foot">
           <span><a href="https://github.com/breakzplatform/crickets.notx.blue" data-i18n="footer.source">ver código</a></span>
           <span><a href="https://notx.blue/privacy" data-i18n="footer.privacy">Privacidade</a></span>
           <span><a href="https://status.joseli.to/" target="_blank" rel="noopener">status</a></span>
@@ -294,12 +294,12 @@
         <p id="confirm-text"></p>
         <ol class="log" id="confirm-list"></ol>
         <div id="confirm-run" hidden>
-          <p class="phase" id="confirm-phase"></p>
+          <p class="m-0 font-bold" id="confirm-phase"></p>
           <progress id="confirm-progress" max="1" value="0"></progress>
         </div>
-        <div class="actions">
-          <button id="confirm-go" type="button" class="db-btn db-btn-danger cast press"></button>
-          <button id="confirm-cancel" type="button" class="db-btn cast press" data-i18n="confirm.cancel">Cancelar</button>
+        <div class="flex flex-wrap gap-2">
+          <button id="confirm-go" type="button" class="notx-btn notx-btn-danger cast press"></button>
+          <button id="confirm-cancel" type="button" class="notx-btn cast press" data-i18n="confirm.cancel">Cancelar</button>
         </div>
       </form>
     </dialog>

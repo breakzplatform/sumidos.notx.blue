@@ -760,7 +760,7 @@ function renderUnfollowed(): void {
           h('span', { class: 'handle' }, `@${a.handle}`),
           h('span', { class: 'when' }, t('unfollowed.at', { date: formatDate(at) })),
         ),
-        Object.assign(h('button', { type: 'button', class: 'db-btn db-btn-sm cast press', 'data-did': did }, t('unfollowed.one')), {
+        Object.assign(h('button', { type: 'button', class: 'notx-btn notx-btn-sm cast press', 'data-did': did }, t('unfollowed.one')), {
           disabled: state.busyWriting,
         }),
       );

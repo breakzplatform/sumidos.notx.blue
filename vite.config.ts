@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import { headTags } from './src/lib/head.ts';
 import { allowedHosts, buildClientMetadata, metadataPath, parseHostList } from './src/lib/oauth-metadata.ts';
@@ -65,7 +66,7 @@ export default defineConfig(({ mode }) => {
   return {
     // `vite build --base=/sumidos/` overrides this for a subpath deploy.
     base: '/',
-    plugins: [siteHead(), clientMetadata(hosts)],
+    plugins: [tailwindcss(), siteHead(), clientMetadata(hosts)],
     build: {
       target: 'es2022',
       sourcemap: false,
