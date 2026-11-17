@@ -16,6 +16,43 @@ export function isMinDays(value: unknown): value is MinDays {
   return MIN_DAYS_OPTIONS.includes(Number(value) as MinDays);
 }
 
+export const MAX_DAYS_OPTIONS = [180, 365, 730, 1095] as const;
+export type MaxDays = (typeof MAX_DAYS_OPTIONS)[number];
+
+export function isMaxDays(value: unknown): value is MaxDays {
+  return value !== '' && value !== null && MAX_DAYS_OPTIONS.includes(Number(value) as MaxDays);
+}
+
+/**
+ * Which accounts the list shows:
+ * - `all`: everything past the threshold;
+ * - `quiet`: accounts that still exist and just stopped posting;
+ * - `unavailable`: deactivated, suspended or gone;
+ * - `invalidHandle`: the handle no longer resolves to the account.
+ */
+export const KINDS = ['all', 'quiet', 'unavailable', 'invalidHandle'] as const;
+export type Kind = (typeof KINDS)[number];
+
+export function isKind(value: unknown): value is Kind {
+  return KINDS.includes(value as Kind);
+}
+
+/** What the AppView shows in place of a handle that fails verification. */
+export const INVALID_HANDLE = 'handle.invalid';
+
+function matchesKind(a: Account, s: Standing, kind: Kind): boolean {
+  switch (kind) {
+    case 'all':
+      return true;
+    case 'quiet':
+      return s.kind !== 'unavailable';
+    case 'unavailable':
+      return s.kind === 'unavailable';
+    case 'invalidHandle':
+      return a.handle === INVALID_HANDLE;
+  }
+}
+
 /**
  * Where an account stands:
  * - `pending`: its feed was not read yet;
@@ -62,6 +99,12 @@ export interface Filters {
   rules: CountRules;
   /** Only accounts quiet for more than this many days. */
   minDays: MinDays;
+  /**
+   * And at most this many, or no limit. A limit leaves out accounts with no
+   * date to compare: never posted, or unavailable.
+   */
+  maxDays: MaxDays | null;
+  kind: Kind;
   search: string;
 }
 
@@ -103,6 +146,8 @@ export function visibleRows(accounts: readonly Account[], f: Filters, now: numbe
     const s = standing(account, f.rules);
     const days = inactiveDays(s, now);
     if (days === undefined || days <= f.minDays) continue;
+    if (f.maxDays !== null && days > f.maxDays) continue;
+    if (!matchesKind(account, s, f.kind)) continue;
     if (!matchesSearch(account, f.search)) continue;
     rows.push({ account, standing: s, days });
   }

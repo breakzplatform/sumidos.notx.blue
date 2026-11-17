@@ -83,7 +83,7 @@
             </div>
             <div id="lookup" class="flex flex-col gap-3.5 *:min-w-0">
               <div id="anon-line" class="anon-box" hidden>
-                <p data-i18n="auth.anonymous">Sem login: dá para consultar qualquer conta. Para deixar de seguir, entre com a sua.</p>
+                <p><strong data-i18n="auth.anonymousLead">Sem login:</strong> <span data-i18n="auth.anonymous">dá para consultar qualquer conta. Para deixar de seguir, entre com a sua.</span></p>
                 <button id="back-to-sign-in" type="button" class="notx-btn notx-btn-primary cast press" data-i18n="auth.backToSignIn">Entrar</button>
               </div>
               <div id="auth-in" class="profile" hidden>
@@ -128,8 +128,18 @@
                       <option value="365">365</option>
                     </select></label
                   >
-                  <label><input id="count-replies" type="checkbox" checked /> <span data-i18n="rules.replies">Contar respostas</span></label>
-                  <label><input id="count-reposts" type="checkbox" /> <span data-i18n="rules.reposts">Contar reposts</span></label>
+                  <label class="min-days"
+                    ><span data-i18n="rules.maxDays">e no máximo</span>
+                    <select id="max-days" class="select-box">
+                      <option value="" selected data-i18n="rules.noMax">sem limite</option>
+                      <option value="180">180</option>
+                      <option value="365">365</option>
+                      <option value="730">730</option>
+                      <option value="1095">1095</option>
+                    </select></label
+                  >
+                  <label><input id="count-replies" type="checkbox" checked /> <span data-i18n="rules.replies">Incluir respostas</span></label>
+                  <label><input id="count-reposts" type="checkbox" /> <span data-i18n="rules.reposts">Incluir reposts</span></label>
                 </fieldset>
                 <p class="notx-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
               </form>
@@ -159,9 +169,18 @@
           </h2>
           <div class="flex flex-col gap-3.5 p-4 *:min-w-0">
             <div class="flex flex-col gap-1.5 font-bold">
-              <label for="search" data-i18n="results.search">Nome ou @</label>
+              <label for="search" data-i18n="results.search">Nome ou arroba</label>
               <span class="notx-field"><input id="search" class="notx-input" type="search" autocomplete="off" spellcheck="false" /></span>
             </div>
+            <label class="min-days"
+              ><span data-i18n="results.kind">Mostrar</span>
+              <select id="kind" class="select-box">
+                <option value="all" selected data-i18n="results.kind.all">Todas</option>
+                <option value="quiet" data-i18n="results.kind.quiet">Contas ativas sem postar</option>
+                <option value="unavailable" data-i18n="results.kind.unavailable">Desativadas ou suspensas</option>
+                <option value="invalidHandle" data-i18n="results.kind.invalidHandle">Com arroba inválida</option>
+              </select></label
+            >
             <p class="list-note" id="results-note"></p>
             <div class="flex flex-wrap items-center justify-between gap-2" id="saved-note" hidden>
               <p class="notx-note" id="saved-text"></p>

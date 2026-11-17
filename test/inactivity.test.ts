@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_COUNT_RULES } from '../src/lib/activity';
-import { DEFAULT_MIN_DAYS, inactiveDays, isMinDays, matchesSearch, standing, visibleRows } from '../src/lib/inactivity';
+import {
+  DEFAULT_MIN_DAYS,
+  INVALID_HANDLE,
+  inactiveDays,
+  isKind,
+  isMaxDays,
+  isMinDays,
+  matchesSearch,
+  standing,
+  visibleRows,
+  type Kind,
+} from '../src/lib/inactivity';
 import type { Account } from '../src/lib/types';
 import { DAY } from './helpers';
 
@@ -53,18 +64,40 @@ describe('visibleRows', () => {
   });
 
   it('orders unavailable, never posted, then most days', () => {
-    const rows = visibleRows(accounts, { rules, minDays: 90, search: '' }, NOW);
+    const rows = visibleRows(accounts, { rules, minDays: 90, maxDays: null, kind: 'all', search: '' }, NOW);
     expect(rows.map((r) => r.account.handle)).toEqual(['gone', 'never', 'quieter', 'quiet']);
   });
 
   it('re-filters when the rules change, without new data', () => {
-    const rows = visibleRows(accounts, { rules: { replies: false, reposts: false }, minDays: 90, search: '' }, NOW);
+    const rows = visibleRows(accounts, { rules: { replies: false, reposts: false }, minDays: 90, maxDays: null, kind: 'all', search: '' }, NOW);
     expect(rows.map((r) => r.account.handle)).toContain('replier');
   });
 
   it('applies the threshold', () => {
-    const rows = visibleRows(accounts, { rules, minDays: 365, search: '' }, NOW);
+    const rows = visibleRows(accounts, { rules, minDays: 365, maxDays: null, kind: 'all', search: '' }, NOW);
     expect(rows.map((r) => r.account.handle)).toEqual(['gone', 'never', 'quieter']);
+  });
+
+  it('applies an upper limit, leaving out accounts with no date', () => {
+    const rows = visibleRows(accounts, { rules, minDays: 90, maxDays: 365, kind: 'all', search: '' }, NOW);
+    expect(rows.map((r) => r.account.handle)).toEqual(['quiet']);
+  });
+
+  it('filters by kind', () => {
+    const list = [...accounts, account(INVALID_HANDLE, { did: 'did:plc:invalid', feed: { lastPost: ago(120), complete: true } })];
+    const pick = (kind: Kind) =>
+      visibleRows(list, { rules, minDays: 90, maxDays: null, kind, search: '' }, NOW).map((r) => r.account.handle);
+    expect(pick('unavailable')).toEqual(['gone']);
+    expect(pick('quiet')).toEqual(['never', 'quieter', 'quiet', INVALID_HANDLE]);
+    expect(pick('invalidHandle')).toEqual([INVALID_HANDLE]);
+  });
+
+  it('only accepts the offered upper limits and kinds', () => {
+    expect(isMaxDays('365')).toBe(true);
+    expect(isMaxDays('')).toBe(false);
+    expect(isMaxDays('90')).toBe(false);
+    expect(isKind('unavailable')).toBe(true);
+    expect(isKind('other')).toBe(false);
   });
 
   it('searches by name or handle', () => {

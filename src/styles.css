@@ -189,8 +189,11 @@ main:focus {
 .anon-box p {
   margin: 0;
   flex: 1 1 260px;
-  font: var(--type-dek);
+  font: var(--type-compact);
   color: var(--text-2);
+}
+.anon-box strong {
+  color: var(--text-1);
 }
 .signin-status:empty {
   display: none;

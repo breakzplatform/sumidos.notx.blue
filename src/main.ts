@@ -6,7 +6,7 @@ import { rowsToCsv } from './lib/csv';
 import { headText } from './lib/head';
 import { I18n, isLocale, type Locale } from './lib/i18n';
 import { normalizeActorInput, normalizeSignInInput } from './lib/identity';
-import { DEFAULT_MIN_DAYS, isMinDays, visibleRows, type Filters, type Row } from './lib/inactivity';
+import { DEFAULT_MIN_DAYS, isKind, isMaxDays, isMinDays, visibleRows, type Filters, type MaxDays, type Row } from './lib/inactivity';
 import type { OAuthSession } from './lib/oauth';
 import { allowedHosts, oauthTarget, parseHostList } from './lib/oauth-metadata';
 import { ActorError, LARGE_LIST, resumeFeeds, scan, type ScanPhase, type ScanProgress, type ScanSubject } from './lib/scan';
@@ -97,6 +97,8 @@ const el = {
   run: byId<HTMLButtonElement>('run'),
   stop: byId<HTMLButtonElement>('stop'),
   minDays: byId<HTMLSelectElement>('min-days'),
+  maxDays: byId<HTMLSelectElement>('max-days'),
+  kind: byId<HTMLSelectElement>('kind'),
   replies: byId<HTMLInputElement>('count-replies'),
   reposts: byId<HTMLInputElement>('count-reposts'),
   status: byId('status'),
@@ -124,6 +126,7 @@ const el = {
   savedNote: byId('saved-note'),
   savedText: byId('saved-text'),
   clearSaved: byId<HTMLButtonElement>('clear-saved'),
+  csv: byId<HTMLButtonElement>('csv'),
   unfollowedBox: byId('unfollowed'),
   unfollowedCount: byId('unfollowed-count'),
   unfollowedList: byId<HTMLOListElement>('unfollowed-list'),
@@ -174,12 +177,21 @@ function filters(): Filters {
   return {
     rules: { replies: el.replies.checked, reposts: el.reposts.checked },
     minDays: isMinDays(el.minDays.value) ? (Number(el.minDays.value) as Filters['minDays']) : DEFAULT_MIN_DAYS,
+    maxDays: isMaxDays(el.maxDays.value) ? (Number(el.maxDays.value) as MaxDays) : null,
+    kind: isKind(el.kind.value) ? el.kind.value : 'all',
     search: el.search.value,
   };
 }
 
 function isOwner(): boolean {
   return Boolean(state.owned && state.session && state.subject && state.session.sub === state.subject.did);
+}
+
+/** An upper limit at or below the threshold would empty the list. */
+function syncMaxDays(): void {
+  const min = Number(el.minDays.value);
+  for (const option of el.maxDays.options) option.disabled = option.value !== '' && Number(option.value) <= min;
+  if (el.maxDays.selectedOptions[0]?.disabled) el.maxDays.value = '';
 }
 
 function rows(): Row[] {
@@ -223,6 +235,9 @@ function applyStatic(): void {
     node.setAttribute('placeholder', t(node.dataset.i18nPlaceholder!));
   }
   for (const option of el.minDays.options) option.textContent = t('rules.days', { count: Number(option.value) });
+  for (const option of el.maxDays.options) {
+    if (option.value) option.textContent = t('rules.days', { count: Number(option.value) });
+  }
   byId<HTMLAnchorElement>('wordmark').href = import.meta.env.BASE_URL;
   byId('wordmark-name').textContent = name;
   byId('wordmark').setAttribute('aria-label', `${name}.notx.blue`);
@@ -410,6 +425,9 @@ function renderResults(): void {
     el.nextPage.disabled = state.page >= pages - 1;
   }
   el.savedNote.hidden = !state.savedAt || reading;
+  // Acting on a list that is still loading would act on part of it.
+  el.csv.disabled = reading;
+  el.clearSaved.disabled = reading;
   if (state.savedAt) el.savedText.textContent = t('saved.note', { date: formatDate(state.savedAt) });
 
   el.ownerBar.hidden = !owner;
@@ -417,7 +435,7 @@ function renderResults(): void {
     const dids = all.map((r) => r.account.did);
     const picked = state.selection.pick(dids).length;
     el.markAll.textContent = t('owner.markAll', { count: dids.length });
-    el.markAll.disabled = dids.length === 0 || state.selection.coversAll(dids);
+    el.markAll.disabled = reading || dids.length === 0 || state.selection.coversAll(dids);
     el.markNone.disabled = picked === 0;
     el.unfollow.textContent = t('owner.unfollow', { count: picked });
     el.unfollow.disabled = picked === 0 || state.busyWriting || Boolean(state.abort);
@@ -923,8 +941,9 @@ byId<HTMLFormElement>('search-form').addEventListener('submit', (e) => {
 });
 el.stop.addEventListener('click', () => state.abort?.abort());
 el.actor.addEventListener('input', () => renderStatus());
-for (const control of [el.minDays, el.replies, el.reposts]) {
+for (const control of [el.minDays, el.maxDays, el.kind, el.replies, el.reposts]) {
   control.addEventListener('change', () => {
+    syncMaxDays();
     state.page = 0;
     renderResults();
   });
@@ -982,7 +1001,7 @@ el.dialog.addEventListener('cancel', (e) => {
 });
 el.dialog.addEventListener('close', () => lastOpener?.focus());
 el.undo.addEventListener('click', () => void runUndo());
-byId('csv').addEventListener('click', () => {
+el.csv.addEventListener('click', () => {
   const handle = state.subject?.handle ?? 'list';
   const date = new Date().toISOString().slice(0, 10);
   download(`${siteName()}-${handle}-${date}.csv`, rowsToCsv(rows()), 'text/csv;charset=utf-8');
