@@ -85,6 +85,7 @@ export const en: Messages = {
     one: '{shown} of {count} account matches the filter',
     other: '{shown} of {count} accounts match the filter',
   },
+  'results.maxDays': 'And at most',
   'results.kind': 'Show',
   'results.kind.all': 'All',
   'results.kind.quiet': 'Active accounts not posting',
@@ -104,10 +105,6 @@ export const en: Messages = {
   'pager.prev': 'Previous',
   'pager.next': 'Next',
   'pager.page': 'Page {page} of {pages}',
-  'results.loading': {
-    one: 'Reading… {count} account so far. The sorted list shows up at the end.',
-    other: 'Reading… {count} accounts so far. The sorted list shows up at the end.',
-  },
   'results.failed': {
     one: '{count} account did not load. Continue tries again.',
     other: '{count} accounts did not load. Continue tries again.',

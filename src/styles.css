@@ -106,10 +106,34 @@ main:focus {
   gap: var(--space-5) var(--space-8);
   align-items: center;
 }
-.options label {
+.options {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.options .range,
+.options .checks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.options .range {
+  gap: var(--space-4);
+}
+.options .checks {
+  gap: var(--space-5) var(--space-8);
+}
+.options .checks label {
   display: flex;
   gap: var(--space-4);
   align-items: center;
+}
+.result-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-8);
+}
+.result-filters select {
+  font-weight: var(--weight-normal);
 }
 .options input[type='checkbox'],
 .check input {
@@ -445,41 +469,6 @@ progress::-moz-progress-bar {
   letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   color: var(--text-3);
-}
-.loading-note {
-  margin: 0;
-  padding: var(--space-5) var(--space-6);
-  border-top: var(--border);
-  font: var(--type-meta);
-  letter-spacing: var(--tracking-meta);
-  text-transform: uppercase;
-  color: var(--text-3);
-}
-.account.skeleton .avatar,
-.account.skeleton .bar {
-  background: var(--surface-sunken);
-}
-.account.skeleton .bar {
-  display: block;
-  height: 12px;
-  width: 45%;
-  margin: 4px 0;
-}
-.account.skeleton .bar.short {
-  width: 25%;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .account.skeleton {
-    animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
-  }
-}
-@keyframes skeleton-pulse {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0.45;
-  }
 }
 /* ---------------------------------------------------------------- dialog */
 

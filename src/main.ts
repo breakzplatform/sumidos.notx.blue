@@ -32,7 +32,6 @@ import { cycleTheme, getTheme, nextTheme, onRemoteThemeChange, type Theme } from
 // Setup
 
 const PER_PAGE_OPTIONS = [20, 40, 60] as const;
-const SKELETON_ROWS = 6;
 const LANG_KEY = 'lang';
 const ANONYMOUS_KEY = 'sumidos.anonymous';
 const BUG_FORM = { en: 'https://q.joseli.to/forms/notx-blue-bugs', 'pt-BR': 'https://q.joseli.to/forms/notx-blue-bugs-pt' };
@@ -99,6 +98,8 @@ const el = {
   minDays: byId<HTMLSelectElement>('min-days'),
   maxDays: byId<HTMLSelectElement>('max-days'),
   kind: byId<HTMLSelectElement>('kind'),
+  resultMinDays: byId<HTMLSelectElement>('r-min-days'),
+  resultMaxDays: byId<HTMLSelectElement>('r-max-days'),
   replies: byId<HTMLInputElement>('count-replies'),
   reposts: byId<HTMLInputElement>('count-reposts'),
   status: byId('status'),
@@ -117,7 +118,6 @@ const el = {
   search: byId<HTMLInputElement>('search'),
   list: byId<HTMLOListElement>('list'),
   empty: byId('empty'),
-  loadingNote: byId('loading-note'),
   pager: byId('pager'),
   perPage: byId<HTMLSelectElement>('per-page'),
   prevPage: byId<HTMLButtonElement>('prev-page'),
@@ -190,8 +190,10 @@ function isOwner(): boolean {
 /** An upper limit at or below the threshold would empty the list. */
 function syncMaxDays(): void {
   const min = Number(el.minDays.value);
-  for (const option of el.maxDays.options) option.disabled = option.value !== '' && Number(option.value) <= min;
-  if (el.maxDays.selectedOptions[0]?.disabled) el.maxDays.value = '';
+  for (const select of [el.maxDays, el.resultMaxDays]) {
+    for (const option of select.options) option.disabled = option.value !== '' && Number(option.value) <= min;
+    if (select.selectedOptions[0]?.disabled) select.value = '';
+  }
 }
 
 function rows(): Row[] {
@@ -234,9 +236,10 @@ function applyStatic(): void {
   for (const node of document.querySelectorAll<HTMLElement>('[data-i18n-placeholder]')) {
     node.setAttribute('placeholder', t(node.dataset.i18nPlaceholder!));
   }
-  for (const option of el.minDays.options) option.textContent = t('rules.days', { count: Number(option.value) });
-  for (const option of el.maxDays.options) {
-    if (option.value) option.textContent = t('rules.days', { count: Number(option.value) });
+  for (const select of [el.minDays, el.maxDays, el.resultMinDays, el.resultMaxDays]) {
+    for (const option of select.options) {
+      if (option.value) option.textContent = t('rules.days', { count: Number(option.value) });
+    }
   }
   byId<HTMLAnchorElement>('wordmark').href = import.meta.env.BASE_URL;
   byId('wordmark-name').textContent = name;
@@ -374,60 +377,39 @@ function rowNode(row: Row, owner: boolean): HTMLLIElement {
   return li;
 }
 
-function skeletonRow(): HTMLLIElement {
-  return h(
-    'li',
-    { class: 'account skeleton', 'aria-hidden': 'true' },
-    h('span', { class: 'avatar' }),
-    h('span', { class: 'who' }, h('span', { class: 'bar' }), h('span', { class: 'bar short' })),
-  );
-}
-
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString(i18n.locale, { dateStyle: 'short', timeStyle: 'short' });
 }
 
 function renderResults(): void {
   const subject = state.subject;
-  el.results.hidden = !subject || state.accounts.length === 0;
+  // While reading, the progress panel is enough: the list appears once the
+  // read ends, already sorted, so rows never jump around.
+  el.results.hidden = !subject || state.accounts.length === 0 || Boolean(state.abort);
   if (!subject || el.results.hidden) return;
 
   const owner = isOwner();
   const all = rows();
-  const total = state.abort ? Math.max(state.accounts.length, subject.followsCount ?? 0) : state.accounts.length;
+  const total = state.accounts.length;
   el.resultsOwner.textContent = t(owner ? 'results.mine' : 'results.public', { handle: subject.handle });
   el.resultsCount.textContent = t('progress.count', { done: all.length, total });
   const failed = state.accounts.filter((a) => a.status === 'error').length;
   el.resultsMeta.textContent = t('results.meta', { shown: all.length, count: total });
   const notes: string[] = [];
-  if (failed > 0 && !state.abort) notes.push(t('results.failed', { count: failed }));
+  if (failed > 0) notes.push(t('results.failed', { count: failed }));
   el.resultsNote.textContent = notes.join(' ');
   el.resultsNote.hidden = notes.length === 0;
 
-  // While reading, rows would keep jumping as the sort changes: show a
-  // placeholder and the count, and the sorted list once the read ends.
-  const reading = Boolean(state.abort);
-  el.loadingNote.hidden = !reading;
-  if (reading) {
-    el.loadingNote.textContent = t('results.loading', { count: state.accounts.length });
-    el.list.replaceChildren(...Array.from({ length: SKELETON_ROWS }, skeletonRow));
-    el.empty.hidden = true;
-    el.pager.hidden = true;
-  } else {
-    const pages = Math.max(1, Math.ceil(all.length / state.perPage));
-    state.page = Math.min(state.page, pages - 1);
-    const start = state.page * state.perPage;
-    el.list.replaceChildren(...all.slice(start, start + state.perPage).map((r) => rowNode(r, owner)));
-    el.empty.hidden = all.length > 0;
-    el.pager.hidden = all.length <= PER_PAGE_OPTIONS[0];
-    el.pageLabel.textContent = t('pager.page', { page: state.page + 1, pages });
-    el.prevPage.disabled = state.page === 0;
-    el.nextPage.disabled = state.page >= pages - 1;
-  }
-  el.savedNote.hidden = !state.savedAt || reading;
-  // Acting on a list that is still loading would act on part of it.
-  el.csv.disabled = reading;
-  el.clearSaved.disabled = reading;
+  const pages = Math.max(1, Math.ceil(all.length / state.perPage));
+  state.page = Math.min(state.page, pages - 1);
+  const start = state.page * state.perPage;
+  el.list.replaceChildren(...all.slice(start, start + state.perPage).map((r) => rowNode(r, owner)));
+  el.empty.hidden = all.length > 0;
+  el.pager.hidden = all.length <= PER_PAGE_OPTIONS[0];
+  el.pageLabel.textContent = t('pager.page', { page: state.page + 1, pages });
+  el.prevPage.disabled = state.page === 0;
+  el.nextPage.disabled = state.page >= pages - 1;
+  el.savedNote.hidden = !state.savedAt;
   if (state.savedAt) el.savedText.textContent = t('saved.note', { date: formatDate(state.savedAt) });
 
   el.ownerBar.hidden = !owner;
@@ -435,10 +417,10 @@ function renderResults(): void {
     const dids = all.map((r) => r.account.did);
     const picked = state.selection.pick(dids).length;
     el.markAll.textContent = t('owner.markAll', { count: dids.length });
-    el.markAll.disabled = reading || dids.length === 0 || state.selection.coversAll(dids);
+    el.markAll.disabled = dids.length === 0 || state.selection.coversAll(dids);
     el.markNone.disabled = picked === 0;
     el.unfollow.textContent = t('owner.unfollow', { count: picked });
-    el.unfollow.disabled = picked === 0 || state.busyWriting || Boolean(state.abort);
+    el.unfollow.disabled = picked === 0 || state.busyWriting;
   }
 }
 
@@ -941,7 +923,16 @@ byId<HTMLFormElement>('search-form').addEventListener('submit', (e) => {
 });
 el.stop.addEventListener('click', () => state.abort?.abort());
 el.actor.addEventListener('input', () => renderStatus());
-for (const control of [el.minDays, el.maxDays, el.kind, el.replies, el.reposts]) {
+// The day range shows in the form and in the results; both copies stay equal.
+const dayPairs: [HTMLSelectElement, HTMLSelectElement][] = [
+  [el.minDays, el.resultMinDays],
+  [el.maxDays, el.resultMaxDays],
+];
+for (const [form, results] of dayPairs) {
+  form.addEventListener('change', () => (results.value = form.value));
+  results.addEventListener('change', () => (form.value = results.value));
+}
+for (const control of [el.minDays, el.maxDays, el.resultMinDays, el.resultMaxDays, el.kind, el.replies, el.reposts]) {
   control.addEventListener('change', () => {
     syncMaxDays();
     state.page = 0;
@@ -1059,6 +1050,7 @@ if (fromUrl) {
 el.replies.checked = DEFAULT_COUNT_RULES.replies;
 el.reposts.checked = DEFAULT_COUNT_RULES.reposts;
 el.minDays.value = String(DEFAULT_MIN_DAYS);
+el.resultMinDays.value = el.minDays.value;
 applyStatic();
 void loadSession().then(restoreList);
 

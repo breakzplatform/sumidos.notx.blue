@@ -85,6 +85,7 @@ export const ptBR: Messages = {
     one: '{shown} de {count} conta no filtro',
     other: '{shown} de {count} contas no filtro',
   },
+  'results.maxDays': 'E no máximo',
   'results.kind': 'Mostrar',
   'results.kind.all': 'Todas',
   'results.kind.quiet': 'Contas ativas sem postar',
@@ -104,7 +105,6 @@ export const ptBR: Messages = {
   'pager.prev': 'Anterior',
   'pager.next': 'Próxima',
   'pager.page': 'Página {page} de {pages}',
-  'results.loading': { one: 'Lendo… {count} conta até agora. A lista aparece ordenada no fim.', other: 'Lendo… {count} contas até agora. A lista aparece ordenada no fim.' },
   'results.failed': {
     one: '{count} conta não carregou. Continuar tenta de novo.',
     other: '{count} contas não carregaram. Continuar tenta de novo.',

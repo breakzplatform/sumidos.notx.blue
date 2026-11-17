@@ -119,27 +119,27 @@
                 </div>
                 <fieldset class="options">
                   <legend class="sr-only" data-i18n="rules.legend">O que conta como atividade</legend>
-                  <label class="min-days"
-                    ><span data-i18n="rules.minDays">Sem postar há mais de</span>
+                  <div class="range">
+                    <label for="min-days" data-i18n="rules.minDays">Sem postar há mais de</label>
                     <select id="min-days" class="select-box">
                       <option value="30">30</option>
                       <option value="90" selected>90</option>
                       <option value="180">180</option>
                       <option value="365">365</option>
-                    </select></label
-                  >
-                  <label class="min-days"
-                    ><span data-i18n="rules.maxDays">e no máximo</span>
+                    </select>
+                    <label for="max-days" data-i18n="rules.maxDays">e no máximo</label>
                     <select id="max-days" class="select-box">
                       <option value="" selected data-i18n="rules.noMax">sem limite</option>
                       <option value="180">180</option>
                       <option value="365">365</option>
                       <option value="730">730</option>
                       <option value="1095">1095</option>
-                    </select></label
-                  >
-                  <label><input id="count-replies" type="checkbox" checked /> <span data-i18n="rules.replies">Incluir respostas</span></label>
-                  <label><input id="count-reposts" type="checkbox" /> <span data-i18n="rules.reposts">Incluir reposts</span></label>
+                    </select>
+                  </div>
+                  <div class="checks">
+                    <label><input id="count-replies" type="checkbox" checked /> <span data-i18n="rules.replies">Incluir respostas</span></label>
+                    <label><input id="count-reposts" type="checkbox" /> <span data-i18n="rules.reposts">Incluir reposts</span></label>
+                  </div>
                 </fieldset>
                 <p class="notx-note" data-i18n="search.hint">Vale qualquer conta pública. Mudar as opções só refiltra o que já foi lido.</p>
               </form>
@@ -172,15 +172,36 @@
               <label for="search" data-i18n="results.search">Nome ou arroba</label>
               <span class="notx-field"><input id="search" class="notx-input" type="search" autocomplete="off" spellcheck="false" /></span>
             </div>
-            <label class="min-days"
-              ><span data-i18n="results.kind">Mostrar</span>
-              <select id="kind" class="select-box">
-                <option value="all" selected data-i18n="results.kind.all">Todas</option>
-                <option value="quiet" data-i18n="results.kind.quiet">Contas ativas sem postar</option>
-                <option value="unavailable" data-i18n="results.kind.unavailable">Desativadas ou suspensas</option>
-                <option value="invalidHandle" data-i18n="results.kind.invalidHandle">Com arroba inválida</option>
-              </select></label
-            >
+            <div class="result-filters">
+              <div class="flex flex-col gap-1.5 font-bold">
+                <label for="r-min-days" data-i18n="rules.minDays">Sem postar há mais de</label>
+                <select id="r-min-days" class="select-box">
+                  <option value="30">30</option>
+                  <option value="90" selected>90</option>
+                  <option value="180">180</option>
+                  <option value="365">365</option>
+                </select>
+              </div>
+              <div class="flex flex-col gap-1.5 font-bold">
+                <label for="r-max-days" data-i18n="results.maxDays">E no máximo</label>
+                <select id="r-max-days" class="select-box">
+                  <option value="" selected data-i18n="rules.noMax">sem limite</option>
+                  <option value="180">180</option>
+                  <option value="365">365</option>
+                  <option value="730">730</option>
+                  <option value="1095">1095</option>
+                </select>
+              </div>
+              <div class="flex flex-col gap-1.5 font-bold">
+                <label for="kind" data-i18n="results.kind">Mostrar</label>
+                <select id="kind" class="select-box">
+                  <option value="all" selected data-i18n="results.kind.all">Todas</option>
+                  <option value="quiet" data-i18n="results.kind.quiet">Contas ativas sem postar</option>
+                  <option value="unavailable" data-i18n="results.kind.unavailable">Desativadas ou suspensas</option>
+                  <option value="invalidHandle" data-i18n="results.kind.invalidHandle">Com arroba inválida</option>
+                </select>
+              </div>
+            </div>
             <p class="list-note" id="results-note"></p>
             <div class="flex flex-wrap items-center justify-between gap-2" id="saved-note" hidden>
               <p class="notx-note" id="saved-text"></p>
@@ -203,7 +224,6 @@
           </div>
           <ol class="accounts" id="list"></ol>
           <p class="empty" id="empty" hidden data-i18n="results.empty">Nenhuma conta corresponde ao filtro.</p>
-          <p class="loading-note" id="loading-note" role="status" hidden></p>
           <nav class="pager" id="pager" aria-label="Páginas" hidden>
             <label class="per-page"
               ><span data-i18n="pager.perPage">Por página</span>
