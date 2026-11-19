@@ -99,6 +99,8 @@ export const en: Messages = {
   'unfollowed.title': 'Unfollowed',
   'unfollowed.note': 'Everyone you unfollowed here is saved in this browser. Follow again brings back the original date.',
   'unfollowed.all': { one: 'Follow again', other: 'Follow all again ({count})' },
+  'unfollowed.hide': 'Hide list',
+  'unfollowed.show': 'Show list',
   'unfollowed.one': 'Follow again',
   'unfollowed.at': 'Unfollowed on {date}',
   'pager.perPage': 'Per page',

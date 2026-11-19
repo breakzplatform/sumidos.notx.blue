@@ -33,6 +33,8 @@ import { cycleTheme, getTheme, nextTheme, onRemoteThemeChange, type Theme } from
 
 const PER_PAGE_OPTIONS = [20, 40, 60] as const;
 const LANG_KEY = 'lang';
+/** Set while the "Deixou de seguir" list is collapsed; absent means shown. */
+const UNFOLLOWED_HIDDEN_KEY = 'unfollowed-hidden';
 const ANONYMOUS_KEY = 'sumidos.anonymous';
 const BUG_FORM = { en: 'https://q.joseli.to/forms/notx-blue-bugs', 'pt-BR': 'https://q.joseli.to/forms/notx-blue-bugs-pt' };
 
@@ -78,6 +80,8 @@ const state = {
   perPage: PER_PAGE_OPTIONS[0] as number,
   /** When the list on screen came from this browser's storage. */
   savedAt: null as string | null,
+  /** The "Deixou de seguir" list is collapsed (remembered in localStorage). */
+  unfollowedCollapsed: storage?.getItem(UNFOLLOWED_HIDDEN_KEY) === '1',
   /** Everyone the signed-in account unfollowed here, kept across visits. */
   unfollowed: {} as UnfollowedMap,
   selection: new Selection(),
@@ -130,6 +134,7 @@ const el = {
   unfollowedBox: byId('unfollowed'),
   unfollowedCount: byId('unfollowed-count'),
   unfollowedList: byId<HTMLOListElement>('unfollowed-list'),
+  unfollowedToggle: byId<HTMLButtonElement>('unfollowed-toggle'),
   refollowAll: byId<HTMLButtonElement>('refollow-all'),
   refollowStatus: byId('refollow-status'),
   ownerBar: byId('owner-bar'),
@@ -770,6 +775,10 @@ function renderUnfollowed(): void {
   el.unfollowedCount.textContent = String(entries.length);
   el.refollowAll.textContent = t('unfollowed.all', { count: entries.length });
   el.refollowAll.disabled = state.busyWriting;
+  const collapsed = state.unfollowedCollapsed;
+  el.unfollowedList.hidden = collapsed;
+  el.unfollowedToggle.textContent = t(collapsed ? 'unfollowed.show' : 'unfollowed.hide');
+  el.unfollowedToggle.setAttribute('aria-expanded', String(!collapsed));
   el.unfollowedList.replaceChildren(
     ...entries.map(([did, { account: a, at }]) => {
       const name = a.displayName?.trim() || a.handle;
@@ -984,6 +993,12 @@ el.clearSaved.addEventListener('click', () => {
   Object.assign(state, { subject: null, accounts: [], savedAt: null, owned: false });
   state.selection.clear();
   renderAll();
+});
+el.unfollowedToggle.addEventListener('click', () => {
+  state.unfollowedCollapsed = !state.unfollowedCollapsed;
+  if (state.unfollowedCollapsed) storage?.setItem(UNFOLLOWED_HIDDEN_KEY, '1');
+  else storage?.removeItem(UNFOLLOWED_HIDDEN_KEY);
+  renderUnfollowed();
 });
 el.refollowAll.addEventListener('click', () => void refollow(Object.keys(state.unfollowed)));
 el.unfollowedList.addEventListener('click', (e) => {

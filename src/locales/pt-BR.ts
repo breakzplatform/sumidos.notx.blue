@@ -100,6 +100,8 @@ export const ptBR: Messages = {
   'unfollowed.note': 'Quem você deixou de seguir por aqui fica salvo neste navegador. Seguir de novo volta com a data original.',
   'unfollowed.all': { one: 'Seguir de novo', other: 'Seguir todas de novo ({count})' },
   'unfollowed.one': 'Seguir de novo',
+  'unfollowed.hide': 'Ocultar lista',
+  'unfollowed.show': 'Mostrar lista',
   'unfollowed.at': 'Deixou de seguir em {date}',
   'pager.perPage': 'Por página',
   'pager.prev': 'Anterior',
