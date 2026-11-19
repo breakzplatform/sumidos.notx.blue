@@ -348,9 +348,11 @@ progress::-moz-progress-bar {
 .owner-bar #unfollow {
   margin-left: auto;
 }
-/* "Mark this page": the row checkbox with its label, Gmail's master box. */
-.page-check {
+/* "Mark this page": the row checkbox with its label, Gmail's master box.
+   Doubled class to beat the .check grid further down. */
+.check.page-check {
   display: inline-flex;
+  align-items: center;
   gap: var(--space-3);
   font-weight: var(--weight-bold);
 }
