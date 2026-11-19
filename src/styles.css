@@ -517,7 +517,8 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-  padding: var(--box-pad);
+  /* 24px, the family's panel rhythm, not the 12px box padding. */
+  padding: var(--space-8);
 }
 .dialog-body h2 {
   margin: 0;
