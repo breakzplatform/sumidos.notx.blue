@@ -83,6 +83,11 @@ describe('visibleRows', () => {
     expect(rows.map((r) => r.account.handle)).toEqual(['quiet']);
   });
 
+  it('ignores the upper limit when listing only unavailable accounts', () => {
+    const rows = visibleRows(accounts, { rules, minDays: 90, maxDays: 365, kind: 'unavailable', search: '' }, NOW);
+    expect(rows.map((r) => r.account.handle)).toEqual(['gone']);
+  });
+
   it('filters by kind', () => {
     const list = [...accounts, account(INVALID_HANDLE, { did: 'did:plc:invalid', feed: { lastPost: ago(120), complete: true } })];
     const pick = (kind: Kind) =>

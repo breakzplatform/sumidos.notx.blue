@@ -101,7 +101,8 @@ export interface Filters {
   minDays: MinDays;
   /**
    * And at most this many, or no limit. A limit leaves out accounts with no
-   * date to compare: never posted, or unavailable.
+   * date to compare: never posted, or unavailable. Listing only unavailable
+   * accounts ignores it, since none of them has a date.
    */
   maxDays: MaxDays | null;
   kind: Kind;
@@ -146,7 +147,7 @@ export function visibleRows(accounts: readonly Account[], f: Filters, now: numbe
     const s = standing(account, f.rules);
     const days = inactiveDays(s, now);
     if (days === undefined || days <= f.minDays) continue;
-    if (f.maxDays !== null && days > f.maxDays) continue;
+    if (f.maxDays !== null && f.kind !== 'unavailable' && days > f.maxDays) continue;
     if (!matchesKind(account, s, f.kind)) continue;
     if (!matchesSearch(account, f.search)) continue;
     rows.push({ account, standing: s, days });
