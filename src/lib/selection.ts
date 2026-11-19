@@ -1,4 +1,13 @@
 /**
+ * How much of the list is marked, Gmail-style, for the "mark this page" box:
+ * - `none`: nothing on the page;
+ * - `some`: part of the page;
+ * - `page`: the whole page, but not everything in the filter;
+ * - `every`: everything in the filter (the page included).
+ */
+export type PageMark = 'none' | 'some' | 'page' | 'every';
+
+/**
  * Which accounts are marked for unfollow. Marks survive filter changes, but
  * only marked accounts that are visible under the current filter count: what
  * the confirmation lists is always a subset of what the list shows.
@@ -41,5 +50,13 @@ export class Selection {
   /** True when every account in `visible` (and at least one) is marked. */
   coversAll(visible: readonly string[]): boolean {
     return visible.length > 0 && visible.every((did) => this.marked.has(did));
+  }
+
+  /** `page` is the slice on screen, `all` every account in the filter. */
+  pageMark(page: readonly string[], all: readonly string[]): PageMark {
+    if (this.coversAll(all)) return 'every';
+    const marked = this.pick(page).length;
+    if (marked === 0) return 'none';
+    return marked === page.length ? 'page' : 'some';
   }
 }

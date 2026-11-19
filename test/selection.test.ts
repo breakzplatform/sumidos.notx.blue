@@ -38,4 +38,21 @@ describe('Selection', () => {
     s.clear();
     expect(s.pick(['a', 'b'])).toEqual([]);
   });
+
+  it('tells the page box how much is marked', () => {
+    const s = new Selection();
+    const all = ['a', 'b', 'c', 'd'];
+    const page = ['a', 'b'];
+    expect(s.pageMark(page, all)).toBe('none');
+    s.set('a', true);
+    expect(s.pageMark(page, all)).toBe('some');
+    s.markAll(page);
+    expect(s.pageMark(page, all)).toBe('page');
+    s.markAll(all);
+    expect(s.pageMark(page, all)).toBe('every');
+    // Unmarking any row, even off the page, drops back from "every".
+    s.set('d', false);
+    expect(s.pageMark(page, all)).toBe('page');
+    expect(new Selection().pageMark([], [])).toBe('none');
+  });
 });

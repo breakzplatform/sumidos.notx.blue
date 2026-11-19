@@ -133,8 +133,10 @@ const el = {
   refollowAll: byId<HTMLButtonElement>('refollow-all'),
   refollowStatus: byId('refollow-status'),
   ownerBar: byId('owner-bar'),
-  markAll: byId<HTMLButtonElement>('mark-all'),
-  markNone: byId<HTMLButtonElement>('mark-none'),
+  markPage: byId<HTMLInputElement>('mark-page'),
+  markNotice: byId('mark-notice'),
+  markNoticeText: byId('mark-notice-text'),
+  markScope: byId<HTMLButtonElement>('mark-scope'),
   unfollow: byId<HTMLButtonElement>('unfollow'),
   undoBar: byId('undo-bar'),
   undoText: byId('undo-text'),
@@ -198,6 +200,14 @@ function syncMaxDays(): void {
 
 function rows(): Row[] {
   return visibleRows(state.accounts, filters(), Date.now());
+}
+
+/** The accounts on the page on screen (renderResults keeps state.page in range). */
+function pageDids(): string[] {
+  const start = state.page * state.perPage;
+  return rows()
+    .slice(start, start + state.perPage)
+    .map((r) => r.account.did);
 }
 
 // ---------------------------------------------------------------------------
@@ -403,7 +413,8 @@ function renderResults(): void {
   const pages = Math.max(1, Math.ceil(all.length / state.perPage));
   state.page = Math.min(state.page, pages - 1);
   const start = state.page * state.perPage;
-  el.list.replaceChildren(...all.slice(start, start + state.perPage).map((r) => rowNode(r, owner)));
+  const pageRows = all.slice(start, start + state.perPage);
+  el.list.replaceChildren(...pageRows.map((r) => rowNode(r, owner)));
   el.empty.hidden = all.length > 0;
   el.pager.hidden = all.length <= PER_PAGE_OPTIONS[0];
   el.pageLabel.textContent = t('pager.page', { page: state.page + 1, pages });
@@ -415,10 +426,25 @@ function renderResults(): void {
   el.ownerBar.hidden = !owner;
   if (owner) {
     const dids = all.map((r) => r.account.did);
+    const pageIds = pageRows.map((r) => r.account.did);
     const picked = state.selection.pick(dids).length;
-    el.markAll.textContent = t('owner.markAll', { count: dids.length });
-    el.markAll.disabled = dids.length === 0 || state.selection.coversAll(dids);
-    el.markNone.disabled = picked === 0;
+    const mark = state.selection.pageMark(pageIds, dids);
+    el.markPage.checked = mark === 'page' || mark === 'every';
+    el.markPage.indeterminate = mark === 'some';
+    el.markPage.disabled = pageIds.length === 0;
+    // Gmail's notice: past one page, offer the whole filter, then a way out.
+    const wider = dids.length > pageIds.length;
+    const kind = el.kind.selectedOptions[0]?.textContent?.trim() ?? '';
+    el.markNotice.hidden = !wider || (mark !== 'page' && mark !== 'every');
+    if (mark === 'page') {
+      el.markNoticeText.textContent = t('owner.pageMarked', { count: pageIds.length });
+      el.markScope.textContent = t('owner.markEvery', { count: dids.length, kind });
+      el.markScope.dataset.action = 'every';
+    } else if (mark === 'every') {
+      el.markNoticeText.textContent = t('owner.everyMarked', { count: dids.length, kind });
+      el.markScope.textContent = t('owner.clearSelection');
+      el.markScope.dataset.action = 'clear';
+    }
     el.unfollow.textContent = t('owner.unfollow', { count: picked });
     el.unfollow.disabled = picked === 0 || state.busyWriting;
   }
@@ -970,12 +996,15 @@ el.list.addEventListener('change', (e) => {
   state.selection.set(box.dataset.did, box.checked);
   renderResults();
 });
-el.markAll.addEventListener('click', () => {
-  state.selection.markAll(rows().map((r) => r.account.did));
+el.markPage.addEventListener('change', () => {
+  // Checking marks the page; unchecking clears everything, as in Gmail.
+  if (el.markPage.checked) state.selection.markAll(pageDids());
+  else state.selection.clear();
   renderResults();
 });
-el.markNone.addEventListener('click', () => {
-  state.selection.clear();
+el.markScope.addEventListener('click', () => {
+  if (el.markScope.dataset.action === 'every') state.selection.markAll(rows().map((r) => r.account.did));
+  else state.selection.clear();
   renderResults();
 });
 el.unfollow.addEventListener('click', openConfirm);

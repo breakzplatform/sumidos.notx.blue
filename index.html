@@ -212,9 +212,14 @@
               <button id="csv" type="button" class="notx-btn notx-btn-sm cast press" data-i18n="results.csv">Exportar CSV</button>
             </div>
             <div id="owner-bar" class="owner-bar" hidden>
-              <button id="mark-all" type="button" class="notx-btn notx-btn-sm cast press"></button>
-              <button id="mark-none" type="button" class="notx-btn notx-btn-sm cast press" data-i18n="owner.clear">Desmarcar</button>
+              <label class="check page-check"
+                ><input type="checkbox" id="mark-page" /><span data-i18n="owner.markPage">Marcar a página</span></label
+              >
               <button id="unfollow" type="button" class="notx-btn notx-btn-danger cast press" disabled></button>
+              <p id="mark-notice" class="mark-notice" role="status" hidden>
+                <span id="mark-notice-text"></span>
+                <button id="mark-scope" type="button" class="link-button"></button>
+              </p>
             </div>
             <div id="undo-bar" class="banner flex flex-wrap items-center gap-2" hidden>
               <p id="undo-text" class="m-0 flex-[1_1_16rem]"></p>

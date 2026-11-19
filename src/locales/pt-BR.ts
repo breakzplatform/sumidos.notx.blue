@@ -131,8 +131,11 @@ export const ptBR: Messages = {
 
   'row.mark': 'Marcar {name}',
 
-  'owner.markAll': { zero: 'Marcar todas do filtro', one: 'Marcar a do filtro', other: 'Marcar todas do filtro ({count})' },
-  'owner.clear': 'Desmarcar',
+  'owner.markPage': 'Marcar a página',
+  'owner.pageMarked': { one: 'A conta desta página está marcada.', other: 'As {count} contas desta página estão marcadas.' },
+  'owner.markEvery': 'Marcar todas as {count} contas em “{kind}”',
+  'owner.everyMarked': 'Todas as {count} contas em “{kind}” estão marcadas.',
+  'owner.clearSelection': 'Limpar seleção',
   'owner.unfollow': {
     zero: 'Deixar de seguir',
     one: 'Deixar de seguir {count} conta',

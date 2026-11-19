@@ -131,8 +131,11 @@ export const en: Messages = {
 
   'row.mark': 'Mark {name}',
 
-  'owner.markAll': { zero: 'Mark all in the filter', one: 'Mark the one in the filter', other: 'Mark all in the filter ({count})' },
-  'owner.clear': 'Unmark',
+  'owner.markPage': 'Mark this page',
+  'owner.pageMarked': { one: 'The account on this page is marked.', other: 'All {count} accounts on this page are marked.' },
+  'owner.markEvery': 'Mark all {count} accounts in “{kind}”',
+  'owner.everyMarked': 'All {count} accounts in “{kind}” are marked.',
+  'owner.clearSelection': 'Clear selection',
   'owner.unfollow': {
     zero: 'Unfollow',
     one: 'Unfollow {count} account',

@@ -348,6 +348,36 @@ progress::-moz-progress-bar {
 .owner-bar #unfollow {
   margin-left: auto;
 }
+/* "Mark this page": the row checkbox with its label, Gmail's master box. */
+.page-check {
+  display: inline-flex;
+  gap: var(--space-3);
+  font-weight: var(--weight-bold);
+}
+/* Under the bar, full width: the page is marked, offer the whole filter. */
+.mark-notice {
+  flex: 1 1 100%;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-sunken);
+  text-align: center;
+  font: var(--type-dek);
+}
+.link-button {
+  margin-left: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font: inherit;
+  font-weight: var(--weight-bold);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-button:hover {
+  background: var(--link);
+  color: var(--text-inverse);
+}
 
 .accounts {
   list-style: none;
