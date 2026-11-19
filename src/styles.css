@@ -372,9 +372,6 @@ progress::-moz-progress-bar {
 .account[data-tone='gone'] {
   box-shadow: inset 4px 0 0 var(--status-error);
 }
-.account[data-tone='empty'] {
-  box-shadow: inset 4px 0 0 var(--status-warn);
-}
 .check {
   display: grid;
   place-items: center;
