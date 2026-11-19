@@ -6,7 +6,7 @@ import { rowsToCsv } from './lib/csv';
 import { headText } from './lib/head';
 import { I18n, isLocale, type Locale } from './lib/i18n';
 import { normalizeActorInput, normalizeSignInInput } from './lib/identity';
-import { DEFAULT_MIN_DAYS, isKind, isMaxDays, isMinDays, visibleRows, type Filters, type MaxDays, type Row } from './lib/inactivity';
+import { DEFAULT_KIND, DEFAULT_MIN_DAYS, isKind, isMaxDays, isMinDays, visibleRows, type Filters, type MaxDays, type Row } from './lib/inactivity';
 import type { OAuthSession } from './lib/oauth';
 import { allowedHosts, oauthTarget, parseHostList } from './lib/oauth-metadata';
 import { ActorError, LARGE_LIST, resumeFeeds, scan, type ScanPhase, type ScanProgress, type ScanSubject } from './lib/scan';
@@ -178,7 +178,7 @@ function filters(): Filters {
     rules: { replies: el.replies.checked, reposts: el.reposts.checked },
     minDays: isMinDays(el.minDays.value) ? (Number(el.minDays.value) as Filters['minDays']) : DEFAULT_MIN_DAYS,
     maxDays: isMaxDays(el.maxDays.value) ? (Number(el.maxDays.value) as MaxDays) : null,
-    kind: isKind(el.kind.value) ? el.kind.value : 'all',
+    kind: isKind(el.kind.value) ? el.kind.value : DEFAULT_KIND,
     search: el.search.value,
   };
 }

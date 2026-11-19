@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_COUNT_RULES } from '../src/lib/activity';
 import {
+  DEFAULT_KIND,
   DEFAULT_MIN_DAYS,
   INVALID_HANDLE,
   inactiveDays,
@@ -61,6 +62,12 @@ describe('visibleRows', () => {
 
   it('defaults to 90 days', () => {
     expect(DEFAULT_MIN_DAYS).toBe(90);
+  });
+
+  it('opens on active accounts, leaving unavailable ones out', () => {
+    expect(DEFAULT_KIND).toBe('quiet');
+    const rows = visibleRows(accounts, { rules, minDays: 90, maxDays: null, kind: DEFAULT_KIND, search: '' }, NOW);
+    expect(rows.map((r) => r.account.handle)).not.toContain('gone');
   });
 
   it('orders unavailable, never posted, then most days', () => {

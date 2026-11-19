@@ -33,6 +33,10 @@ export function isMaxDays(value: unknown): value is MaxDays {
 export const KINDS = ['all', 'quiet', 'unavailable', 'invalidHandle'] as const;
 export type Kind = (typeof KINDS)[number];
 
+/** Deactivated and suspended accounts can't post, so by default they stay out
+ *  of the way: the list opens on accounts that exist and went quiet. */
+export const DEFAULT_KIND: Kind = 'quiet';
+
 export function isKind(value: unknown): value is Kind {
   return KINDS.includes(value as Kind);
 }
