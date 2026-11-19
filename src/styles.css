@@ -369,8 +369,10 @@ progress::-moz-progress-bar {
 .account.has-check {
   grid-template-columns: 32px 44px minmax(0, 1fr) auto;
 }
-.account[data-tone='gone'] {
-  box-shadow: inset 4px 0 0 var(--status-error);
+/* No coloured edge: accounts that can't post or never posted get a quieter fill. */
+.account[data-tone='gone'],
+.account[data-tone='empty'] {
+  background: var(--surface-sunken);
 }
 .check {
   display: grid;
