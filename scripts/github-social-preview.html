@@ -67,6 +67,8 @@ body{position:relative;font-family:var(--sans)}
 .cursor{display:inline-block;width:10px;height:18px;background:var(--t-1);vertical-align:-3px}
 .screen .link{color:var(--t-link);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .screen .label{margin-top:0}
+.shot{position:absolute;right:64px;top:72px;width:540px;height:512px;border:2px solid var(--ink);background:#fff;overflow:hidden}
+.shot img{display:block;width:100%;height:auto;margin-top:-282px}
 </style>
 </head>
 <body>
@@ -89,25 +91,6 @@ body{position:relative;font-family:var(--sans)}
     <div class="meta">Bluesky · atproto · in your browser · GPL-3.0</div>
   </div>
 
-  <div class="term cast" style="--shadow:#111111">
-    
-    <div class="bar"><span>sumidos.notx.blue</span><span>crickets in English</span></div>
-
-    
-<div class="screen"><span class="dim">$</span> lookup <span class="b">alice.example</span>
-<span class="dim">read 812 follows · 4 at a time</span>
-<div class="hr"></div><span class="label">QUIET 90+ DAYS</span>
-
-  quiet-diary.example      <span class="b">412 days</span>
-  old-blog.example         <span class="b">287 days</span>
-  holiday-poster.example   <span class="b">203 days</span>
-  never-posts.example      <span class="b">never</span>
-  side-project.example     <span class="b">118 days</span>
-  weekend-only.example     <span class="b"> 96 days</span>
-<div class="hr"></div><span class="dim">marked</span> 6   <span class="dim">batch</span> applyWrites x200
-<span class="dim">$</span> unfollow --confirm
-<span class="dim">unfollowed 6 · undo while the tab is open</span>
-<span class="cursor"></span></div>
-  </div>
+  <div class="shot cast" style="--shadow:#111111"><img src="github-social-preview-app.png" alt=""></div>
 </body>
 </html>
