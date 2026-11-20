@@ -14,39 +14,31 @@ Everything runs in the browser. There is no server of ours.
 
 1. Type any public handle. The page lists who it follows (public AppView,
    `app.bsky.graph.getFollows`) and reads each account's latest activity
-   (`app.bsky.feed.getAuthorFeed`, one item, a few more pages only when the
-   newest item is a reply or a repost).
-2. Results stream in while the scan runs, most quiet first: deactivated or
-   suspended, never posted, then by days without posting. The threshold
-   (30/90/180/365 days, default 90) and the "count replies" (on) and "count
-   reposts" (off) toggles only re-filter what was already read.
-3. From 500 follows the page warns that the scan takes a while. Four
-   requests at a time; on a 429 every request waits together, and the wait
-   is shown.
+   (`app.bsky.feed.getAuthorFeed`).
+2. When the read ends, the list shows most quiet first. Filters (kind, day
+   range, replies and reposts) only re-filter what was already read. The
+   current view exports to CSV.
 
 ### Your own list
 
 Logging in (atproto OAuth, scope
 `atproto repo:app.bsky.graph.follow?action=create&action=delete`) unlocks
-unfollowing, and only when the list on screen is the logged-in account's:
-
-- the scan also lists your follow records from your PDS, which brings back
-  accounts the public AppView hides (deactivated, suspended, deleted);
-- mark accounts one by one or all in the current filter; the confirmation
-  shows the total and every handle;
-- deletes go through `com.atproto.repo.applyWrites`, 200 per call, paced;
-- "Undo" writes the same records back (same keys, same dates) while the tab
-  stays open.
+unfollowing on the logged-in account's own list. The scan also reads your
+follow records from your PDS, so deactivated or deleted accounts show up.
+Deletes go through `com.atproto.repo.applyWrites`, 200 per call. "Undo"
+works while the tab is open; after that, the "Unfollowed" panel follows them
+again with the original date.
 
 Without a session, nothing but public AppView data for the typed handle is
 read.
 
 ## Privacy
 
-Nothing is stored or sent to our servers. The browser keeps the language and
-theme. With login, the session belongs to the tab that logged in: other tabs
-don't use it, logging out revokes it, and a session left behind by a closed
-tab is revoked on the next visit.
+Nothing is sent to our servers. This browser keeps the language, the theme,
+the last list read and the accounts unfollowed here. With login, the session
+belongs to the tab that logged in: other tabs don't use it, logging out
+revokes it, and a session left behind by a closed tab is revoked on the next
+visit.
 
 The full policy, shared by every notx.blue app, is at
 <https://notx.blue/privacy>.

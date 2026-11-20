@@ -14,8 +14,9 @@ All notable changes to this project are documented here. The format follows
 - Activity is read once per account; "count replies" (on by default),
   "count reposts" (off) and the 30/90/180/365-day threshold (90 by default)
   only re-filter.
-- Results stream in during the scan; from 500 follows the page warns that it
-  takes a while and shows the 429 wait.
+- The list shows when the read ends, in pages, with filters by kind and day
+  range; from 500 follows the page warns that it takes a while and shows the
+  429 wait.
 - Unfollowing uses `com.atproto.repo.applyWrites` in batches of 200, with no
   cap on how many, and can be undone while the tab is open.
 - A login session stays in the tab that logged in.
@@ -33,6 +34,7 @@ All notable changes to this project are documented here. The format follows
 ### Removed
 
 - The "ghost" badge and its heuristics.
-- The scan cache (IndexedDB), saved scans and the keep list: nothing about a
-  lookup is stored.
+- The scan cache, saved scans and the keep list. Only the last list and the
+  accounts unfollowed here stay in the browser, so they can be followed again
+  later.
 - Mutual detection (`getRelationships`).
