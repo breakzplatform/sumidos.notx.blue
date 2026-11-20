@@ -67,8 +67,8 @@ body{position:relative;font-family:var(--sans)}
 .cursor{display:inline-block;width:10px;height:18px;background:var(--t-1);vertical-align:-3px}
 .screen .link{color:var(--t-link);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .screen .label{margin-top:0}
-.shot{position:absolute;right:64px;top:72px;width:540px;height:512px;border:2px solid var(--ink);background:#fff;overflow:hidden}
-.shot img{display:block;width:100%;height:auto;margin-top:-282px}
+.shot{position:absolute;right:56px;top:64px;bottom:56px;width:620px;display:flex;align-items:center;justify-content:center}
+.shot img{display:block;max-width:100%;max-height:100%}
 </style>
 </head>
 <body>
@@ -91,6 +91,6 @@ body{position:relative;font-family:var(--sans)}
     <div class="meta">Bluesky · atproto · in your browser · GPL-3.0</div>
   </div>
 
-  <div class="shot cast" style="--shadow:#111111"><img src="github-social-preview-app.png" alt=""></div>
+  <div class="shot"><img src="github-social-preview-app.png" alt=""></div>
 </body>
 </html>
