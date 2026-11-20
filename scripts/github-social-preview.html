@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>sumidos.notx.blue</title>
+<style>
+@font-face{font-family:"CMU Serif";font-weight:700;src:url("https://static.joseli.to/assets/fonts/cmu-serif-700-roman.woff2") format("woff2")}
+@font-face{font-family:"CMU Typewriter Text";font-weight:400;src:url("https://static.joseli.to/assets/fonts/cmu-typewriter-text-500-roman.woff2") format("woff2")}
+@font-face{font-family:"CMU Typewriter Text";font-weight:700;src:url("https://static.joseli.to/assets/fonts/cmu-typewriter-text-700-roman.woff2") format("woff2")}
+@font-face{font-family:"CMU Sans Serif";font-weight:400;src:url("https://static.joseli.to/assets/fonts/cmu-sans-serif-500-roman.woff2") format("woff2")}
+@font-face{font-family:"CMU Sans Serif";font-weight:700;src:url("https://static.joseli.to/assets/fonts/cmu-sans-serif-700-roman.woff2") format("woff2")}
+
+:root{
+  --paper:#F4F1EA; --card:#FBF9F4; --ink:#111111; --text-2:#3A3A3A; --text-3:#5A5650;
+  --spot:#E10600; --amber:#FFAA00;
+  --t-bg:#000000; --t-1:#FFB000; --t-2:#D89A18; --t-3:#A9761A; --t-link:#FFD54A; --t-hair:#3A2907;
+  --serif:"CMU Serif",Georgia,serif;
+  --sans:"CMU Sans Serif",system-ui,sans-serif;
+  --mono:"CMU Typewriter Text",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1280px;height:640px;overflow:hidden;background:var(--paper);color:var(--ink)}
+body{position:relative;font-family:var(--sans)}
+
+/* double masthead rule, newspaper style */
+.rule-top{position:absolute;left:64px;right:64px;top:40px;border-top:3px solid var(--ink)}
+.rule-top::after{content:"";position:absolute;left:0;right:0;top:4px;border-top:1px solid var(--ink)}
+
+.left{position:absolute;left:64px;top:84px;width:560px;height:516px;display:flex;flex-direction:column}
+.kicker{font:700 20px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--spot)}
+.wordmark{margin-top:26px;font:700 112px/1 var(--serif);letter-spacing:-.02em;white-space:nowrap}
+.ink-block{display:inline-block;line-height:.92;padding:.04em .07em .1em;background:var(--amber);color:#000;transform:rotate(-1.5deg)}
+.dek{margin-top:26px;font:400 34px/1.25 var(--sans);color:var(--text-2);max-width:540px}
+.cmd{
+  margin-top:40px;align-self:flex-start;position:relative;isolation:isolate;
+  border:2px solid var(--ink);background:var(--card);
+  font:700 38px/1 var(--mono);padding:16px 22px 18px;white-space:nowrap
+}
+.cmd .dollar{color:var(--text-3);font-weight:400}
+.cast::before{content:"";position:absolute;inset:0;z-index:-1;background:inherit}
+.cast::after{
+  content:"";position:absolute;inset:-2px;z-index:-2;transform:translate(8px,8px);
+  background:conic-gradient(from 270deg at 2px 2px,var(--shadow,var(--ink)) 25%,transparent 0) 0 0/4px 4px;
+}
+.meta{margin-top:auto;font:400 17px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+
+/* terminal window: amber island */
+.term{
+  position:absolute;right:64px;top:72px;width:540px;height:512px;
+  border:2px solid var(--ink);background:var(--t-bg);color:var(--t-1);isolation:isolate;
+  font:400 16px/23px var(--mono);
+}
+.term .bar{
+  display:flex;justify-content:space-between;align-items:center;height:34px;padding:0 14px;
+  background:var(--ink);color:var(--paper);border-bottom:2px solid var(--ink);
+  font:700 13px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase
+}
+.screen{height:calc(100% - 34px);padding:16px 22px 0;white-space:pre;overflow:hidden}
+.dim{color:var(--t-3)}
+.b{font-weight:700}
+.hr{border-top:1px solid #4a360c;margin:12px 0 10px}
+.label{display:inline-block;background:var(--t-1);color:#000;font-weight:700;padding:0 7px;margin-top:8px}
+.row{display:grid;grid-template-columns:150px 1fr;white-space:nowrap}
+.row .k{color:var(--t-3)}
+.row .v{color:var(--t-link);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.cursor{display:inline-block;width:10px;height:18px;background:var(--t-1);vertical-align:-3px}
+.screen .link{color:var(--t-link);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.screen .label{margin-top:0}
+</style>
+</head>
+<body>
+  <div class="rule-top"></div>
+
+  <div class="left">
+    
+    <div class="kicker">breakzplatform / sumidos.notx.blue</div>
+
+    
+    <div class="wordmark"><span class="ink-block">sumidos</span></div>
+
+    
+    <p class="dek">Find who a Bluesky account follows that stopped posting, and unfollow them in bulk.</p>
+
+    
+    
+
+    
+    <div class="meta">Bluesky · atproto · in your browser · GPL-3.0</div>
+  </div>
+
+  <div class="term cast" style="--shadow:#111111">
+    
+    <div class="bar"><span>sumidos.notx.blue</span><span>crickets in English</span></div>
+
+    
+<div class="screen"><span class="dim">$</span> lookup <span class="b">alice.example</span>
+<span class="dim">read 812 follows · 4 at a time</span>
+<div class="hr"></div><span class="label">QUIET 90+ DAYS</span>
+
+  quiet-diary.example      <span class="b">412 days</span>
+  old-blog.example         <span class="b">287 days</span>
+  holiday-poster.example   <span class="b">203 days</span>
+  never-posts.example      <span class="b">never</span>
+  side-project.example     <span class="b">118 days</span>
+  weekend-only.example     <span class="b"> 96 days</span>
+<div class="hr"></div><span class="dim">marked</span> 6   <span class="dim">batch</span> applyWrites x200
+<span class="dim">$</span> unfollow --confirm
+<span class="dim">unfollowed 6 · undo while the tab is open</span>
+<span class="cursor"></span></div>
+  </div>
+</body>
+</html>
