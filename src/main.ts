@@ -12,7 +12,7 @@ import { allowedHosts, oauthTarget, parseHostList } from './lib/oauth-metadata';
 import { ActorError, LARGE_LIST, resumeFeeds, scan, type ScanPhase, type ScanProgress, type ScanSubject } from './lib/scan';
 import { Selection } from './lib/selection';
 import { clearList, loadList, loadUnfollowed, saveList, saveUnfollowed, type UnfollowedMap } from './lib/saved';
-import { localeForHost, siteNameFor } from './lib/site';
+import { localeForHost, siteHostForLocale, siteNameFor } from './lib/site';
 import type { Account } from './lib/types';
 import {
   indexFollowRecords,
@@ -51,7 +51,10 @@ const appview = new XrpcClient(serviceFetchHandler(PUBLIC_APPVIEW), {
 });
 const reader = new AppViewReader(appview);
 
+// A saved choice only applies off the site hosts, where the host itself
+// doesn't settle the language.
 function initialLocale(): Locale {
+  if (siteHostForLocale(host, localeForHost(host))) return localeForHost(host);
   const saved = storage?.getItem(LANG_KEY);
   return isLocale(saved) ? saved : localeForHost(host);
 }
@@ -1067,6 +1070,11 @@ el.backToSignIn.addEventListener('click', () => {
 });
 el.language.addEventListener('click', () => {
   const next: Locale = i18n.locale === 'en' ? 'pt-BR' : 'en';
+  const target = siteHostForLocale(host, next);
+  if (target) {
+    location.assign(`${location.protocol}//${target}${location.pathname}${location.search}${location.hash}`);
+    return;
+  }
   i18n.setLocale(next);
   try {
     storage?.setItem(LANG_KEY, next);

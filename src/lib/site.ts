@@ -27,6 +27,15 @@ export function localeForHost(hostname: string): Locale {
   return site(hostname)?.locale ?? 'pt-BR';
 }
 
+/**
+ * On a site host the language is the host, so switching language means
+ * moving to the other site. Elsewhere there is no other site to move to.
+ */
+export function siteHostForLocale(hostname: string, locale: Locale): string | undefined {
+  if (!site(hostname)) return undefined;
+  return Object.entries(SITES).find(([, entry]) => entry.locale === locale)?.[0];
+}
+
 export function siteNameFor(hostname: string, locale: Locale): SiteName {
   return site(hostname)?.name ?? NAME_FOR_LOCALE[locale];
 }

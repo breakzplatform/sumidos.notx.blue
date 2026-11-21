@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { localeForHost, siteNameFor } from '../src/lib/site';
+import { localeForHost, siteHostForLocale, siteNameFor } from '../src/lib/site';
 
 describe('localeForHost', () => {
   it('opens each site host in its own language', () => {
@@ -24,5 +24,17 @@ describe('siteNameFor', () => {
   it('names other hosts after the language showing', () => {
     expect(siteNameFor('redesign--sumidos-notx-blue.netlify.app', 'pt-BR')).toBe('sumidos');
     expect(siteNameFor('redesign--sumidos-notx-blue.netlify.app', 'en')).toBe('crickets');
+  });
+});
+
+describe('siteHostForLocale', () => {
+  it('points each site host to the site of the other language', () => {
+    expect(siteHostForLocale('sumidos.notx.blue', 'en')).toBe('crickets.notx.blue');
+    expect(siteHostForLocale('CRICKETS.notx.blue', 'pt-BR')).toBe('sumidos.notx.blue');
+  });
+
+  it('has no site to move to from other hosts', () => {
+    expect(siteHostForLocale('127.0.0.1', 'en')).toBeUndefined();
+    expect(siteHostForLocale('redesign--sumidos-notx-blue.netlify.app', 'en')).toBeUndefined();
   });
 });
